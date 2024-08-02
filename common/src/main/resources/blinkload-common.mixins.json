@@ -4,7 +4,10 @@
   "package": "io.github.steveplays28.blinkload.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [],
-  "client": [],
+  "client": [
+    "client.SpriteLoaderMixin",
+    "client.accessor.SpriteContentsAccessor"
+  ],
   "injectors": {
     "defaultRequire": 1
   }
