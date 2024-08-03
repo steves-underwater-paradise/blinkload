@@ -2,8 +2,8 @@ package io.github.steveplays28.blinkload.mixin.client;
 
 import io.github.steveplays28.blinkload.BlinkLoad;
 import io.github.steveplays28.blinkload.client.cache.BlinkLoadCache;
-import io.github.steveplays28.blinkload.mixin.client.accessor.SpriteContentsAccessor;
 import io.github.steveplays28.blinkload.util.AtlasTextureUtils;
+import io.github.steveplays28.blinkload.util.AtlasTextureJson;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.resource.metadata.AnimationResourceMetadata;
@@ -18,12 +18,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Executor;
 
 @Environment(EnvType.CLIENT)
@@ -93,17 +89,35 @@ public class SpriteLoaderMixin {
 				continue;
 			}
 
+            // Category/region of the sprite
+            var atlasIdentifier = atlasTexture.getValue().getAtlasId();
+            // Actual sprite identifier
+            var spriteIdentifier = atlasTexture.getKey();
+            var x = atlasTexture.getValue().getX();
+            var y = atlasTexture.getValue().getY();
+            var width = atlasTexture.getValue().getContents().getWidth();
+            var height = atlasTexture.getValue().getContents().getHeight();
+
+			// {"atlas_texture_id":{"namespace":"minecraft","path":"textures/atlas/blocks.png"},"sprite_texture_id":{"namespace":"minecraft","path":"block/jukebox_top"},"width":16,"height":16,"x":448,"y":240}
+            AtlasTextureJson sprite = new AtlasTextureJson(atlasIdentifier, spriteIdentifier, width, height, x, y);
+
+			var gson = new Gson().newBuilder().setFieldNamingPolicy(
+					FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).create();
+			String json = gson.toJson(sprite);
+			BlinkLoadCache.cacheData(json);
+
+			/*
+            // atlas_texture_namespace/atlas_texture_path/texture_region_namespace/x_y_width_height_SEPARATOR_texture_region_path.png
+            var textureFolderPath = atlasTexturesPath.resolve(String.format("%s/%s/%s/", atlasIdentifier.getNamespace(), atlasIdentifier.getPath(), spriteIdentifier.getNamespace()));
+			textureFolderPath.toFile().mkdirs();
+
+			var textureFilePath = textureFolderPath.resolve(String.format("%s_%s_%s_%s_SEPARATOR_%s.png", x, y, width, height, spriteIdentifier.getPath()));
 			try {
-				// TODO: Save X
-				// TODO: Save Y
-				// TODO: Save atlas texture Identifier
-				// TODO: Save atlas texture width
-				// TODO: Save atlas texture height
-				((SpriteContentsAccessor) atlasTexture.getValue().getContents()).getImage().writeTo(
-						atlasTexturesPath.resolve(String.format("%s.png", atlasTexture.getKey().toUnderscoreSeparatedString())));
+				((SpriteContentsAccessor) atlasTexture.getValue().getContents()).getImage().writeTo(textureFilePath);
 			} catch (IOException e) {
-				BlinkLoad.LOGGER.error("Exception thrown while saving atlas textures: ", e);
-			}
-		}
+				BlinkLoad.LOGGER.error("Exception thrown while saving texture: ", e);
+            }
+			 */
+        }
 	}
 }
