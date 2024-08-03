@@ -1,13 +1,12 @@
-package io.github.steveplays28.blinkload.util;
+package io.github.steveplays28.blinkload.util.resource.json;
 
+import net.minecraft.client.texture.NativeImage;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.UUID;
-
 @SuppressWarnings({"FieldCanBeLocal", "FieldMayBeFinal", "unused"})
-public class StitchResult {
-    private @Nullable UUID uuid;
+public class StitchResult implements Comparable<StitchResult> {
     private int width;
     private int height;
     private int mipLevel;
@@ -18,12 +17,6 @@ public class StitchResult {
         this.height = height;
         this.mipLevel = mipLevel;
         this.atlasTextureRegions = atlasTextureRegions;
-
-        this.uuid = UUID.randomUUID();
-    }
-
-    public @Nullable UUID getUUID() {
-        return uuid;
     }
 
     public int getWidth() {
@@ -42,17 +35,22 @@ public class StitchResult {
         return atlasTextureRegions;
     }
 
+    @Override
+    public int compareTo(@NotNull StitchResult stitchResult) {
+        return Integer.compare(getAtlasTextureRegions().length, stitchResult.getAtlasTextureRegions().length);
+    }
+
     public static class AtlasTextureRegion {
         private @Nullable Identifier atlasTextureRegionId;
-        private @Nullable Identifier spriteId;
+        private @Nullable Sprite sprite;
         private int width;
         private int height;
         private int x;
         private int y;
 
-        public AtlasTextureRegion(@Nullable Identifier atlasTextureId, @Nullable Identifier spriteId, int width, int height, int x, int y) {
+        public AtlasTextureRegion(@Nullable Identifier atlasTextureId, @Nullable Sprite sprite, int width, int height, int x, int y) {
             this.atlasTextureRegionId = atlasTextureId;
-            this.spriteId = spriteId;
+            this.sprite = sprite;
             this.width = width;
             this.height = height;
             this.x = x;
@@ -63,8 +61,8 @@ public class StitchResult {
             return atlasTextureRegionId;
         }
 
-        public @Nullable Identifier getSpriteId() {
-            return spriteId;
+        public @Nullable Sprite getSprite() {
+            return sprite;
         }
 
         public int getWidth() {
@@ -81,6 +79,24 @@ public class StitchResult {
 
         public int getY() {
             return y;
+        }
+
+        public static class Sprite {
+            private @Nullable Identifier identifier;
+            private @Nullable NativeImage nativeImage;
+
+            public Sprite(@Nullable Identifier identifier, @Nullable NativeImage nativeImage) {
+                this.identifier = identifier;
+                this.nativeImage = nativeImage;
+            }
+
+            public @Nullable Identifier getIdentifier() {
+                return identifier;
+            }
+
+            public @Nullable NativeImage getNativeImage() {
+                return nativeImage;
+            }
         }
     }
 }

@@ -3,20 +3,18 @@ package io.github.steveplays28.blinkload.client.cache;
 import io.github.steveplays28.blinkload.BlinkLoad;
 import io.github.steveplays28.blinkload.client.event.ClientLifecycleEvent;
 import io.github.steveplays28.blinkload.util.AtlasTextureUtils;
-import io.github.steveplays28.blinkload.util.JsonUtil;
-import io.github.steveplays28.blinkload.util.StitchResult;
-import net.minecraft.client.texture.NativeImage;
+import io.github.steveplays28.blinkload.util.resource.json.JsonUtil;
+import io.github.steveplays28.blinkload.util.resource.json.StitchResult;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
-import java.nio.file.Path;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 public class BlinkLoadCache {
-	private static final @NotNull File CACHED_DATA_FILE = new File(String.format("%s/atlas_textures_cache.json", AtlasTextureUtils.getCachePath()));
-	private static final @NotNull Map<StitchResult, List<NativeImage>> CACHED_DATA = new ConcurrentHashMap<>();
+	private static final @NotNull File CACHED_DATA_FILE = new File(
+			String.format("%s/atlas_textures_cache.json", AtlasTextureUtils.getCachePath()));
+	private static final @NotNull Set<StitchResult> CACHED_DATA = new ConcurrentSkipListSet<>();
 
 	private static boolean hasFirstResourceReloadFinished = false;
 
@@ -33,18 +31,12 @@ public class BlinkLoadCache {
 		return true;
 	}
 
-	public static @NotNull Map<StitchResult, List<NativeImage>> getCachedData() {
+	public static @NotNull Set<StitchResult> getCachedData() {
 		// Read JSON from a file
-		try (Reader reader = new FileReader(CACHED_DATA_FILE)) {
-			// convert the JSON data to a Java object
-			var stitchResults = JsonUtil.getGson().fromJson(reader, StitchResult[].class);
-			for (@NotNull var stitchResult : stitchResults) {
-				// TODO: Read all NativeImages
-				@NotNull List<NativeImage> nativeImages = new ArrayList<>();
-				@NotNull var nativeImage = NativeImage.read(new FileInputStream(Path.of(String.format("%s/%s.png", AtlasTextureUtils.getCachePath(), stitchResult.getUUID())).toFile()));
-				nativeImages.add(nativeImage);
-				CACHED_DATA.put(stitchResult, nativeImages);
-			}
+		try (@NotNull Reader reader = new FileReader(CACHED_DATA_FILE)) {
+			// Convert the JSON data to a Java object
+			var stitchResult = JsonUtil.getGson().fromJson(reader, StitchResult[].class);
+			CACHED_DATA.addAll(Arrays.asList(stitchResult));
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -52,8 +44,8 @@ public class BlinkLoadCache {
 		return CACHED_DATA;
 	}
 
-	public static void cacheData(@NotNull StitchResult stitchResult, @NotNull List<NativeImage> nativeImage) {
-		CACHED_DATA.put(stitchResult, nativeImage);
+	public static void cacheData(@NotNull StitchResult stitchResult) {
+		CACHED_DATA.add(stitchResult);
 	}
 
 	private static void onFirstResourceReload() {
@@ -68,25 +60,10 @@ public class BlinkLoadCache {
 			CACHED_DATA_FILE.getParentFile().mkdirs();
 
 			@NotNull var file = new FileWriter(CACHED_DATA_FILE);
-			file.write(String.format("[%s]", String.join(",\n", JsonUtil.getGson().toJson(CACHED_DATA))));
+			file.write(JsonUtil.getGson().toJson(CACHED_DATA.toArray(StitchResult[]::new)));
 			file.close();
-
-			for (@Nullable var cachedData : CACHED_DATA.entrySet()) {
-				if (cachedData == null) {
-					continue;
-				}
-
-				@Nullable var nativeImages = cachedData.getValue();
-				if (nativeImages == null) {
-					continue;
-				}
-
-                for (@NotNull var nativeImage : nativeImages) {
-					nativeImage.writeTo(Path.of(String.format("%s/%s.png", AtlasTextureUtils.getCachePath(), cachedData.getKey().getUUID())));
-				}
-			}
 		} catch (IOException e) {
 			BlinkLoad.LOGGER.error("Exception thrown while writing cache data to file ({}): {}", e, CACHED_DATA_FILE);
-        }
-    }
+		}
+	}
 }
