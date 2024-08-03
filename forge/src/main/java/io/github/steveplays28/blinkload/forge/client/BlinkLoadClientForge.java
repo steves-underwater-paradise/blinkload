@@ -1,5 +1,6 @@
 package io.github.steveplays28.blinkload.forge.client;
 
+import io.github.steveplays28.blinkload.client.BlinkLoadClient;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.eventbus.api.IEventBus;

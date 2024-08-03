@@ -1,14 +1,14 @@
 package io.github.steveplays28.blinkload.mixin.client;
 
+import com.google.gson.FieldNamingPolicy;
+import com.google.gson.Gson;
 import io.github.steveplays28.blinkload.BlinkLoad;
 import io.github.steveplays28.blinkload.client.cache.BlinkLoadCache;
 import io.github.steveplays28.blinkload.util.AtlasTextureUtils;
 import io.github.steveplays28.blinkload.util.AtlasTextureJson;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.resource.metadata.AnimationResourceMetadata;
 import net.minecraft.client.texture.*;
-import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
@@ -73,15 +73,30 @@ public class SpriteLoaderMixin {
 //		cir.setReturnValue(new SpriteLoader.StitchResult(width, height, ));
 //	}
 
+			/*
+		minecraft:trims/models/armor/coast_gold=TextureAtlasSprite{
+			contents='SpriteContents{
+				name=minecraft:trims/models/armor/coast_gold,
+				frameCount=1,
+				height=32,
+				width=64
+			}',
+			u0=0.0625,
+			u1=0.125,
+			v0=0.0625,
+			v1=0.09375
+		}
+		 */
+
 	/**
 	 * Saves the atlas textures to the cache.
 	 */
 	@Inject(method = "stitch", at = @At(value = "RETURN"))
 	private void blinkload$saveAtlasTextures(List<SpriteContents> sprites, int mipLevel, Executor executor, @NotNull CallbackInfoReturnable<SpriteLoader.StitchResult> cir) {
 		@NotNull var atlasTexturesPath = AtlasTextureUtils.getAtlasTexturesPath();
-		if (!atlasTexturesPath.toFile().mkdirs()) {
-			BlinkLoad.LOGGER.error("Error occurred while creating directories for path: {}", atlasTexturesPath);
-		}
+//		if (!atlasTexturesPath.toFile().mkdirs()) {
+//			BlinkLoad.LOGGER.error("Error occurred while creating directories for path: {}", atlasTexturesPath);
+//		}
 
 		@NotNull var atlasTextures = cir.getReturnValue().regions();
 		for (@Nullable var atlasTexture : atlasTextures.entrySet()) {
