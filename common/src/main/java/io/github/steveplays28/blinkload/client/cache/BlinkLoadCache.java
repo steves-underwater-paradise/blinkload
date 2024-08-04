@@ -7,16 +7,19 @@ import io.github.steveplays28.blinkload.util.resource.json.JsonUtil;
 import io.github.steveplays28.blinkload.util.resource.json.StitchResult;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 public class BlinkLoadCache {
 	private static final @NotNull File CACHED_DATA_FILE = new File(
 			String.format("%s/atlas_textures_cache.json", AtlasTextureUtils.getCachePath()));
-	private static final @NotNull Map<Identifier, StitchResult> CACHED_DATA = new ConcurrentHashMap<>();
+
+	private static @Nullable Map<Identifier, StitchResult> CACHED_DATA = null;
 
 	private static boolean hasFirstResourceReloadFinished = false;
 
@@ -35,23 +38,33 @@ public class BlinkLoadCache {
 
 	@SuppressWarnings("ForLoopReplaceableByForEach")
 	public static @NotNull Map<Identifier, StitchResult> getCachedData() {
-		// Read JSON from a file
-		try (@NotNull Reader reader = new FileReader(CACHED_DATA_FILE)) {
-			// Convert the JSON data to a Java object
-			@NotNull var stitchResults = JsonUtil.getGson().fromJson(reader, StitchResult[].class);
-			for (int stitchResultIndex = 0; stitchResultIndex < stitchResults.length; stitchResultIndex++) {
-				@NotNull var stitchResult = stitchResults[stitchResultIndex];
-				CACHED_DATA.put(stitchResult.getAtlasTextureId(), stitchResult);
+		if (CACHED_DATA == null) {
+			var startTime = System.nanoTime();
+
+			CACHED_DATA = new ConcurrentHashMap<>();
+			// Read JSON from the cached data file
+			try (@NotNull Reader reader = new FileReader(CACHED_DATA_FILE)) {
+				// Convert the JSON data to a Java object
+				@NotNull var stitchResults = JsonUtil.getGson().fromJson(reader, StitchResult[].class);
+				for (int stitchResultIndex = 0; stitchResultIndex < stitchResults.length; stitchResultIndex++) {
+					@NotNull var stitchResult = stitchResults[stitchResultIndex];
+					CACHED_DATA.put(stitchResult.getAtlasTextureId(), stitchResult);
+				}
+
+				BlinkLoad.LOGGER.info(
+						"Loaded atlas textures from cache (took {}ms).",
+						TimeUnit.MILLISECONDS.convert(System.nanoTime() - startTime, TimeUnit.NANOSECONDS)
+				);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
 			}
-		} catch (IOException e) {
-			throw new RuntimeException(e);
 		}
 
 		return CACHED_DATA;
 	}
 
 	public static void cacheData(@NotNull StitchResult stitchResult) {
-		CACHED_DATA.put(stitchResult.getAtlasTextureId(), stitchResult);
+		getCachedData().put(stitchResult.getAtlasTextureId(), stitchResult);
 	}
 
 	private static void onFirstResourceReload() {
@@ -66,7 +79,7 @@ public class BlinkLoadCache {
 			CACHED_DATA_FILE.getParentFile().mkdirs();
 
 			@NotNull var file = new FileWriter(CACHED_DATA_FILE);
-			file.write(JsonUtil.getGson().toJson(CACHED_DATA.values()));
+			file.write(JsonUtil.getGson().toJson(getCachedData().values()));
 			file.close();
 		} catch (IOException e) {
 			BlinkLoad.LOGGER.error("Exception thrown while writing cache data to file ({}): {}", e, CACHED_DATA_FILE);
