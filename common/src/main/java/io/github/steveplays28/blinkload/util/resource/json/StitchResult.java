@@ -7,16 +7,22 @@ import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings({"FieldCanBeLocal", "FieldMayBeFinal", "unused"})
 public class StitchResult implements Comparable<StitchResult> {
+    private @Nullable Identifier atlasTextureId;
     private int width;
     private int height;
     private int mipLevel;
     private @Nullable AtlasTextureRegion[] atlasTextureRegions;
 
-    public StitchResult(int width, int height, int mipLevel, @Nullable AtlasTextureRegion[] atlasTextureRegions) {
+    public StitchResult(@Nullable Identifier atlasTextureId, int width, int height, int mipLevel, @Nullable AtlasTextureRegion[] atlasTextureRegions) {
+        this.atlasTextureId = atlasTextureId;
         this.width = width;
         this.height = height;
         this.mipLevel = mipLevel;
         this.atlasTextureRegions = atlasTextureRegions;
+    }
+
+    public @Nullable Identifier getAtlasTextureId() {
+        return atlasTextureId;
     }
 
     public int getWidth() {

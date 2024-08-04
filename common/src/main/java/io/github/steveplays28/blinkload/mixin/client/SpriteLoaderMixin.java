@@ -7,6 +7,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.resource.metadata.AnimationResourceMetadata;
 import net.minecraft.client.texture.*;
+import net.minecraft.resource.ResourceManager;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -26,92 +27,92 @@ public class SpriteLoaderMixin {
 	 * Loads the atlas textures cache, if it exists and is up-to-date.
 	 */
 	@SuppressWarnings("ForLoopReplaceableByForEach")
-	@Inject(method = "stitch", at = @At(value = "HEAD"), cancellable = true)
-	private void blinkload$loadAtlasTexturesCache(List<SpriteContents> sprites, int mipLevel, Executor executor, @NotNull CallbackInfoReturnable<SpriteLoader.StitchResult> cir) {
+	@Inject(method = "load(Lnet/minecraft/resource/ResourceManager;Lnet/minecraft/util/Identifier;ILjava/util/concurrent/Executor;)Ljava/util/concurrent/CompletableFuture;", at = @At(value = "HEAD"), cancellable = true)
+	private void blinkload$loadAtlasTexturesFromCache(@NotNull ResourceManager resourceManager, @NotNull Identifier atlasTextureId, int mipLevel, @NotNull Executor executor, @NotNull CallbackInfoReturnable<CompletableFuture<SpriteLoader.StitchResult>> cir) {
 		if (!BlinkLoadCache.isUpToDate()) {
 			return;
 		}
 
 		@NotNull Map<Identifier, Sprite> atlasTextureRegions = new HashMap<>();
-		@Nullable StitchResult stitchResult = null;
-		for (@NotNull var stitchResultIterator = BlinkLoadCache.getCachedData().iterator(); stitchResultIterator.hasNext(); ) {
-			stitchResult = stitchResultIterator.next();
-			if (stitchResult == null) {
-				continue;
-			}
-
-			var stitchResultAtlasTextureRegions = stitchResult.getAtlasTextureRegions();
-			for (int stitchResultAtlasTextureRegionIndex = 0; stitchResultAtlasTextureRegionIndex < stitchResultAtlasTextureRegions.length; stitchResultAtlasTextureRegionIndex++) {
-				@NotNull var atlasTextureRegion = stitchResultAtlasTextureRegions[stitchResultAtlasTextureRegionIndex];
-				@Nullable var atlasTextureRegionId = atlasTextureRegion.getAtlasTextureRegionId();
-				if (atlasTextureRegionId == null) {
-					continue;
-				}
-
-				@Nullable var sprite = atlasTextureRegion.getSprite();
-				if (sprite == null) {
-					continue;
-				}
-
-				@Nullable var spriteId = sprite.getIdentifier();
-				@Nullable var spriteNativeImage = sprite.getNativeImage();
-				if (spriteId == null || spriteNativeImage == null) {
-					continue;
-				}
-
-				atlasTextureRegions.put(
-						spriteId, new Sprite(atlasTextureRegionId, new SpriteContents(spriteId,
-								new SpriteDimensions(atlasTextureRegion.getWidth(), atlasTextureRegion.getHeight()), spriteNativeImage,
-								AnimationResourceMetadata.EMPTY
-						), stitchResult.getWidth(), stitchResult.getHeight(), atlasTextureRegion.getX(), atlasTextureRegion.getY())
-				);
-			}
-		}
-
+		@Nullable var stitchResult = BlinkLoadCache.getCachedData().get(atlasTextureId);
 		if (stitchResult == null) {
 			return;
 		}
 
-		cir.setReturnValue(new SpriteLoader.StitchResult(stitchResult.getWidth(), stitchResult.getHeight(), stitchResult.getMipLevel(),
-				atlasTextureRegions.get(MissingSprite.getMissingSpriteId()), atlasTextureRegions, CompletableFuture.completedFuture(null)
+		var stitchResultAtlasTextureRegions = stitchResult.getAtlasTextureRegions();
+		for (int stitchResultAtlasTextureRegionIndex = 0; stitchResultAtlasTextureRegionIndex < stitchResultAtlasTextureRegions.length; stitchResultAtlasTextureRegionIndex++) {
+			@NotNull var atlasTextureRegion = stitchResultAtlasTextureRegions[stitchResultAtlasTextureRegionIndex];
+			@Nullable var atlasTextureRegionId = atlasTextureRegion.getAtlasTextureRegionId();
+			if (atlasTextureRegionId == null) {
+				continue;
+			}
+
+			@Nullable var sprite = atlasTextureRegion.getSprite();
+			if (sprite == null) {
+				continue;
+			}
+
+			@Nullable var spriteId = sprite.getIdentifier();
+			@Nullable var spriteNativeImage = sprite.getNativeImage();
+			if (spriteId == null || spriteNativeImage == null) {
+				continue;
+			}
+
+			atlasTextureRegions.put(
+					spriteId, new Sprite(
+							atlasTextureRegionId, new SpriteContents(spriteId,
+							new SpriteDimensions(atlasTextureRegion.getWidth(), atlasTextureRegion.getHeight()), spriteNativeImage,
+							AnimationResourceMetadata.EMPTY
+					), stitchResult.getWidth(), stitchResult.getHeight(), atlasTextureRegion.getX(),
+							atlasTextureRegion.getY()
+					)
+			);
+		}
+
+		cir.setReturnValue(CompletableFuture.completedFuture(
+				new SpriteLoader.StitchResult(stitchResult.getWidth(), stitchResult.getHeight(), stitchResult.getMipLevel(),
+						atlasTextureRegions.get(MissingSprite.getMissingSpriteId()), atlasTextureRegions,
+						CompletableFuture.completedFuture(null)
+				)
 		));
 	}
 
 	/**
 	 * Saves the atlas textures to the cache.
 	 */
-	@Inject(method = "stitch", at = @At(value = "RETURN"))
-	private void blinkload$saveAtlasTextures(List<SpriteContents> sprites, int mipLevel, Executor executor, @NotNull CallbackInfoReturnable<SpriteLoader.StitchResult> cir) {
-		if (BlinkLoadCache.isUpToDate()) {
-			return;
-		}
-
-		@NotNull var stitchResult = cir.getReturnValue();
-		var stitchResultAtlasTextureRegions = stitchResult.regions();
-		@NotNull List<StitchResult.AtlasTextureRegion> atlasTextureRegions = new ArrayList<>();
-		for (@Nullable var stitchResultAtlasTextureRegion : stitchResultAtlasTextureRegions.entrySet()) {
-			if (stitchResultAtlasTextureRegion == null) {
-				continue;
+	@Inject(method = "load(Lnet/minecraft/resource/ResourceManager;Lnet/minecraft/util/Identifier;ILjava/util/concurrent/Executor;)Ljava/util/concurrent/CompletableFuture;", at = @At(value = "RETURN"))
+	private void blinkload$saveAtlasTextures(@NotNull ResourceManager resourceManager, @NotNull Identifier atlasTextureId, int mipLevel, @NotNull Executor executor, @NotNull CallbackInfoReturnable<CompletableFuture<SpriteLoader.StitchResult>> cir) {
+		cir.getReturnValue().thenAccept(stitchResult -> {
+			if (BlinkLoadCache.isUpToDate()) {
+				return;
 			}
 
-			// Category/region of the sprite
-			var atlasIdentifier = stitchResultAtlasTextureRegion.getValue().getAtlasId();
-			// Actual sprite identifier
-			var spriteIdentifier = stitchResultAtlasTextureRegion.getKey();
-			var x = stitchResultAtlasTextureRegion.getValue().getX();
-			var y = stitchResultAtlasTextureRegion.getValue().getY();
-			var width = stitchResultAtlasTextureRegion.getValue().getContents().getWidth();
-			var height = stitchResultAtlasTextureRegion.getValue().getContents().getHeight();
-			atlasTextureRegions.add(new StitchResult.AtlasTextureRegion(atlasIdentifier,
-					new StitchResult.AtlasTextureRegion.Sprite(
-							spriteIdentifier,
-							((SpriteContentsAccessor) stitchResultAtlasTextureRegion.getValue().getContents()).getImage()
-					), width, height, x, y
-			));
-		}
+			var stitchResultAtlasTextureRegions = stitchResult.regions();
+			@NotNull List<StitchResult.AtlasTextureRegion> atlasTextureRegions = new ArrayList<>();
+			for (@Nullable var stitchResultAtlasTextureRegion : stitchResultAtlasTextureRegions.entrySet()) {
+				if (stitchResultAtlasTextureRegion == null) {
+					continue;
+				}
 
-		BlinkLoadCache.cacheData(new StitchResult(stitchResult.width(), stitchResult.height(), stitchResult.mipLevel(),
-				atlasTextureRegions.toArray(StitchResult.AtlasTextureRegion[]::new)
-		));
+				// Category/region of the sprite
+				var atlasIdentifier = stitchResultAtlasTextureRegion.getValue().getAtlasId();
+				// Actual sprite identifier
+				var spriteIdentifier = stitchResultAtlasTextureRegion.getKey();
+				var x = stitchResultAtlasTextureRegion.getValue().getX();
+				var y = stitchResultAtlasTextureRegion.getValue().getY();
+				var width = stitchResultAtlasTextureRegion.getValue().getContents().getWidth();
+				var height = stitchResultAtlasTextureRegion.getValue().getContents().getHeight();
+				atlasTextureRegions.add(new StitchResult.AtlasTextureRegion(atlasIdentifier,
+						new StitchResult.AtlasTextureRegion.Sprite(
+								spriteIdentifier,
+								((SpriteContentsAccessor) stitchResultAtlasTextureRegion.getValue().getContents()).getImage()
+						), width, height, x, y
+				));
+			}
+
+			BlinkLoadCache.cacheData(new StitchResult(atlasTextureId, stitchResult.width(), stitchResult.height(), stitchResult.mipLevel(),
+					atlasTextureRegions.toArray(StitchResult.AtlasTextureRegion[]::new)
+			));
+		});
 	}
 }
