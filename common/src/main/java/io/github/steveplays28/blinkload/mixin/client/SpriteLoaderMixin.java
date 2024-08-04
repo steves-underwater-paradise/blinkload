@@ -33,29 +33,43 @@ public class SpriteLoaderMixin {
 		}
 
 		@NotNull Map<Identifier, Sprite> atlasTextureRegions = new HashMap<>();
-		@NotNull var currentThreadName = Thread.currentThread().getName();
-		var workerThreadIndex = Integer.parseInt(currentThreadName.substring(currentThreadName.length() - 1));
-		var stitchResultIterator = BlinkLoadCache.getCachedData().iterator();
-		@Nullable StitchResult stitchResult = stitchResultIterator.next();
-		for (int i = 0; i < workerThreadIndex; i++) {
+		@Nullable StitchResult stitchResult = null;
+		for (@NotNull var stitchResultIterator = BlinkLoadCache.getCachedData().iterator(); stitchResultIterator.hasNext(); ) {
 			stitchResult = stitchResultIterator.next();
+			if (stitchResult == null) {
+				continue;
+			}
+
+			var stitchResultAtlasTextureRegions = stitchResult.getAtlasTextureRegions();
+			for (int stitchResultAtlasTextureRegionIndex = 0; stitchResultAtlasTextureRegionIndex < stitchResultAtlasTextureRegions.length; stitchResultAtlasTextureRegionIndex++) {
+				@NotNull var atlasTextureRegion = stitchResultAtlasTextureRegions[stitchResultAtlasTextureRegionIndex];
+				@Nullable var atlasTextureRegionId = atlasTextureRegion.getAtlasTextureRegionId();
+				if (atlasTextureRegionId == null) {
+					continue;
+				}
+
+				@Nullable var sprite = atlasTextureRegion.getSprite();
+				if (sprite == null) {
+					continue;
+				}
+
+				@Nullable var spriteId = sprite.getIdentifier();
+				@Nullable var spriteNativeImage = sprite.getNativeImage();
+				if (spriteId == null || spriteNativeImage == null) {
+					continue;
+				}
+
+				atlasTextureRegions.put(
+						spriteId, new Sprite(atlasTextureRegionId, new SpriteContents(spriteId,
+								new SpriteDimensions(atlasTextureRegion.getWidth(), atlasTextureRegion.getHeight()), spriteNativeImage,
+								AnimationResourceMetadata.EMPTY
+						), stitchResult.getWidth(), stitchResult.getHeight(), atlasTextureRegion.getX(), atlasTextureRegion.getY())
+				);
+			}
 		}
 
 		if (stitchResult == null) {
 			return;
-		}
-
-		var stitchResultAtlasTextureRegions = stitchResult.getAtlasTextureRegions();
-		for (int stitchResultAtlasTextureRegionIndex = 0; stitchResultAtlasTextureRegionIndex < stitchResultAtlasTextureRegions.length; stitchResultAtlasTextureRegionIndex++) {
-			var atlasTextureRegion = stitchResultAtlasTextureRegions[stitchResultAtlasTextureRegionIndex];
-			var atlasTextureRegionId = atlasTextureRegion.getAtlasTextureRegionId();
-			atlasTextureRegions.put(
-					atlasTextureRegionId, new Sprite(atlasTextureRegionId,
-							new SpriteContents(atlasTextureRegion.getSprite().getIdentifier(),
-									new SpriteDimensions(atlasTextureRegion.getWidth(), atlasTextureRegion.getHeight()),
-									atlasTextureRegion.getSprite().getNativeImage(), AnimationResourceMetadata.EMPTY
-							), stitchResult.getWidth(), stitchResult.getHeight(), atlasTextureRegion.getX(), atlasTextureRegion.getY()
-					));
 		}
 
 		cir.setReturnValue(new SpriteLoader.StitchResult(stitchResult.getWidth(), stitchResult.getHeight(), stitchResult.getMipLevel(),
@@ -68,6 +82,10 @@ public class SpriteLoaderMixin {
 	 */
 	@Inject(method = "stitch", at = @At(value = "RETURN"))
 	private void blinkload$saveAtlasTextures(List<SpriteContents> sprites, int mipLevel, Executor executor, @NotNull CallbackInfoReturnable<SpriteLoader.StitchResult> cir) {
+		if (BlinkLoadCache.isUpToDate()) {
+			return;
+		}
+
 		@NotNull var stitchResult = cir.getReturnValue();
 		var stitchResultAtlasTextureRegions = stitchResult.regions();
 		@NotNull List<StitchResult.AtlasTextureRegion> atlasTextureRegions = new ArrayList<>();
