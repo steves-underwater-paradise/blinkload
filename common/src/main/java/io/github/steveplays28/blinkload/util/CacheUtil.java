@@ -6,14 +6,8 @@ import java.nio.file.Path;
 
 import static io.github.steveplays28.blinkload.BlinkLoad.MOD_ID;
 
-public class AtlasTextureUtils {
-	private static final @NotNull String ATLAS_TEXTURES_FOLDER_NAME = "atlas_textures";
-
+public class CacheUtil {
 	public static @NotNull Path getCachePath() {
 		return ModUtil.getGameDirectory().resolve(String.format(".%s/", MOD_ID));
-	}
-
-	public static @NotNull Path getAtlasTexturesPath() {
-		return ModUtil.getGameDirectory().resolve(String.format(".%s/%s/", MOD_ID, ATLAS_TEXTURES_FOLDER_NAME));
 	}
 }

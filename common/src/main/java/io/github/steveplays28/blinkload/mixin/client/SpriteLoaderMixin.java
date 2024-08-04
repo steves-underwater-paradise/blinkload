@@ -39,42 +39,42 @@ public class SpriteLoaderMixin {
 			return;
 		}
 
-		var stitchResultAtlasTextureRegions = stitchResult.getAtlasTextureRegions();
-		for (int stitchResultAtlasTextureRegionIndex = 0; stitchResultAtlasTextureRegionIndex < stitchResultAtlasTextureRegions.length; stitchResultAtlasTextureRegionIndex++) {
-			@NotNull var atlasTextureRegion = stitchResultAtlasTextureRegions[stitchResultAtlasTextureRegionIndex];
-			@Nullable var atlasTextureRegionId = atlasTextureRegion.getAtlasTextureRegionId();
-			if (atlasTextureRegionId == null) {
-				continue;
+		cir.setReturnValue(CompletableFuture.supplyAsync(() -> {
+			var stitchResultAtlasTextureRegions = stitchResult.getAtlasTextureRegions();
+			for (int stitchResultAtlasTextureRegionIndex = 0; stitchResultAtlasTextureRegionIndex < stitchResultAtlasTextureRegions.length; stitchResultAtlasTextureRegionIndex++) {
+				@NotNull var atlasTextureRegion = stitchResultAtlasTextureRegions[stitchResultAtlasTextureRegionIndex];
+				@Nullable var atlasTextureRegionId = atlasTextureRegion.getAtlasTextureRegionId();
+				if (atlasTextureRegionId == null) {
+					continue;
+				}
+
+				@Nullable var sprite = atlasTextureRegion.getSprite();
+				if (sprite == null) {
+					continue;
+				}
+
+				@Nullable var spriteId = sprite.getIdentifier();
+				@Nullable var spriteNativeImage = sprite.getNativeImage();
+				if (spriteId == null || spriteNativeImage == null) {
+					continue;
+				}
+
+				atlasTextureRegions.put(
+						spriteId, new Sprite(
+								atlasTextureRegionId, new SpriteContents(spriteId,
+								new SpriteDimensions(atlasTextureRegion.getWidth(), atlasTextureRegion.getHeight()), spriteNativeImage,
+								AnimationResourceMetadata.EMPTY
+						), stitchResult.getWidth(), stitchResult.getHeight(), atlasTextureRegion.getX(),
+								atlasTextureRegion.getY()
+						)
+				);
 			}
 
-			@Nullable var sprite = atlasTextureRegion.getSprite();
-			if (sprite == null) {
-				continue;
-			}
-
-			@Nullable var spriteId = sprite.getIdentifier();
-			@Nullable var spriteNativeImage = sprite.getNativeImage();
-			if (spriteId == null || spriteNativeImage == null) {
-				continue;
-			}
-
-			atlasTextureRegions.put(
-					spriteId, new Sprite(
-							atlasTextureRegionId, new SpriteContents(spriteId,
-							new SpriteDimensions(atlasTextureRegion.getWidth(), atlasTextureRegion.getHeight()), spriteNativeImage,
-							AnimationResourceMetadata.EMPTY
-					), stitchResult.getWidth(), stitchResult.getHeight(), atlasTextureRegion.getX(),
-							atlasTextureRegion.getY()
-					)
+			return new SpriteLoader.StitchResult(stitchResult.getWidth(), stitchResult.getHeight(), stitchResult.getMipLevel(),
+					atlasTextureRegions.get(MissingSprite.getMissingSpriteId()), atlasTextureRegions,
+					CompletableFuture.completedFuture(null)
 			);
-		}
-
-		cir.setReturnValue(CompletableFuture.completedFuture(
-				new SpriteLoader.StitchResult(stitchResult.getWidth(), stitchResult.getHeight(), stitchResult.getMipLevel(),
-						atlasTextureRegions.get(MissingSprite.getMissingSpriteId()), atlasTextureRegions,
-						CompletableFuture.completedFuture(null)
-				)
-		));
+		}, executor));
 	}
 
 	/**

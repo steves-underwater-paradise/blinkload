@@ -2,7 +2,7 @@ package io.github.steveplays28.blinkload.client.cache;
 
 import io.github.steveplays28.blinkload.BlinkLoad;
 import io.github.steveplays28.blinkload.client.event.ClientLifecycleEvent;
-import io.github.steveplays28.blinkload.util.AtlasTextureUtils;
+import io.github.steveplays28.blinkload.util.CacheUtil;
 import io.github.steveplays28.blinkload.util.resource.json.JsonUtil;
 import io.github.steveplays28.blinkload.util.resource.json.StitchResult;
 import net.minecraft.util.Identifier;
@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 
 public class BlinkLoadCache {
 	private static final @NotNull File CACHED_DATA_FILE = new File(
-			String.format("%s/atlas_textures_cache.json", AtlasTextureUtils.getCachePath()));
+			String.format("%s/atlas_textures_cache.json", CacheUtil.getCachePath()));
 
 	private static @Nullable Map<Identifier, StitchResult> CACHED_DATA = null;
 
@@ -69,6 +69,7 @@ public class BlinkLoadCache {
 
 	private static void onFirstResourceReload() {
 		hasFirstResourceReloadFinished = true;
+		// TODO: Don't write the cache every time the game starts in the render thread
 		BlinkLoad.LOGGER.info("Atlas creation finished. Caching data to JSON.");
 		writeCacheDataToFile();
 	}
