@@ -19,7 +19,7 @@ public class BlinkLoadCache {
 	private static final @NotNull File CACHED_DATA_FILE = new File(
 			String.format("%s/atlas_textures_cache.json", CacheUtil.getCachePath()));
 
-	private static @Nullable Map<Identifier, StitchResult> CACHED_DATA = null;
+	private static @Nullable Map<Identifier, StitchResult> cachedData = null;
 	private static @Nullable Boolean isUpToDate = null;
 
 	public static void initialize() {
@@ -37,17 +37,17 @@ public class BlinkLoadCache {
 
 	@SuppressWarnings("ForLoopReplaceableByForEach")
 	public static @NotNull Map<Identifier, StitchResult> getCachedData() {
-		if (CACHED_DATA == null) {
+		if (cachedData == null) {
 			var startTime = System.nanoTime();
 
-			CACHED_DATA = new ConcurrentHashMap<>();
+			cachedData = new ConcurrentHashMap<>();
 			// Read JSON from the cached data file
 			try (@NotNull Reader reader = new FileReader(CACHED_DATA_FILE)) {
 				// Convert the JSON data to a Java object
 				@NotNull var stitchResults = JsonUtil.getGson().fromJson(reader, StitchResult[].class);
 				for (int stitchResultIndex = 0; stitchResultIndex < stitchResults.length; stitchResultIndex++) {
 					@NotNull var stitchResult = stitchResults[stitchResultIndex];
-					CACHED_DATA.put(stitchResult.getAtlasTextureId(), stitchResult);
+					cachedData.put(stitchResult.getAtlasTextureId(), stitchResult);
 				}
 
 				BlinkLoad.LOGGER.info(
@@ -59,7 +59,7 @@ public class BlinkLoadCache {
 			}
 		}
 
-		return CACHED_DATA;
+		return cachedData;
 	}
 
 	public static void cacheData(@NotNull StitchResult stitchResult) {
