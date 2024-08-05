@@ -90,7 +90,7 @@ public class BlinkLoadCache {
 	}
 
 	private static void writeCacheDataToFile() {
-		if (!isUpToDate()) {
+		if (isUpToDate()) {
 			return;
 		}
 
