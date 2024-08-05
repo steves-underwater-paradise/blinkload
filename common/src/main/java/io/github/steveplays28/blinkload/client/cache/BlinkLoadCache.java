@@ -3,11 +3,11 @@ package io.github.steveplays28.blinkload.client.cache;
 import io.github.steveplays28.blinkload.BlinkLoad;
 import io.github.steveplays28.blinkload.client.event.ClientLifecycleEvent;
 import io.github.steveplays28.blinkload.util.CacheUtil;
+import io.github.steveplays28.blinkload.util.resource.json.AtlasTextureIdentifier;
 import io.github.steveplays28.blinkload.util.resource.json.JsonUtil;
 import io.github.steveplays28.blinkload.util.resource.json.StitchResult;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -22,7 +22,7 @@ public class BlinkLoadCache {
 	private static final @NotNull File CACHED_DATA_FILE = new File(
 			String.format("%s/atlas_textures_cache.json", CacheUtil.getCachePath()));
 
-	private static @Nullable Map<Identifier, StitchResult> cachedData = null;
+	private static @Nullable Map<AtlasTextureIdentifier, StitchResult> cachedData = null;
 	private static @Nullable Boolean isUpToDate = null;
 
 	public static void initialize() {
@@ -39,7 +39,7 @@ public class BlinkLoadCache {
 	}
 
 	@SuppressWarnings("ForLoopReplaceableByForEach")
-	public static @NotNull Map<Identifier, StitchResult> getCachedData() {
+	public static @NotNull Map<AtlasTextureIdentifier, StitchResult> getCachedData() {
 		if (cachedData == null) {
 			var startTime = System.nanoTime();
 
@@ -50,7 +50,7 @@ public class BlinkLoadCache {
 				@NotNull var stitchResults = JsonUtil.getGson().fromJson(reader, StitchResult[].class);
 				for (int stitchResultIndex = 0; stitchResultIndex < stitchResults.length; stitchResultIndex++) {
 					@NotNull var stitchResult = stitchResults[stitchResultIndex];
-					cachedData.put(stitchResult.getAtlasTextureId(), stitchResult);
+					cachedData.put(new AtlasTextureIdentifier(stitchResult.getAtlasTextureId(), stitchResult.getMipLevel()), stitchResult);
 				}
 
 				BlinkLoad.LOGGER.info(
@@ -66,7 +66,7 @@ public class BlinkLoadCache {
 	}
 
 	public static void cacheData(@NotNull StitchResult stitchResult) {
-		getCachedData().put(stitchResult.getAtlasTextureId(), stitchResult);
+		getCachedData().put(new AtlasTextureIdentifier(stitchResult.getAtlasTextureId(), stitchResult.getMipLevel()), stitchResult);
 	}
 
 	private static void onClientResourceReloadFinished() {

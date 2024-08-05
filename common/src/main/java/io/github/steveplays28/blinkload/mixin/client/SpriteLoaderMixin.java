@@ -2,6 +2,7 @@ package io.github.steveplays28.blinkload.mixin.client;
 
 import io.github.steveplays28.blinkload.client.cache.BlinkLoadCache;
 import io.github.steveplays28.blinkload.mixin.client.accessor.SpriteContentsAccessor;
+import io.github.steveplays28.blinkload.util.resource.json.AtlasTextureIdentifier;
 import io.github.steveplays28.blinkload.util.resource.json.StitchResult;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -34,7 +35,7 @@ public class SpriteLoaderMixin {
 		}
 
 		@NotNull Map<Identifier, Sprite> atlasTextureRegions = new HashMap<>();
-		@Nullable var stitchResult = BlinkLoadCache.getCachedData().get(atlasTextureId);
+		@Nullable var stitchResult = BlinkLoadCache.getCachedData().get(new AtlasTextureIdentifier(atlasTextureId, mipLevel));
 		if (stitchResult == null) {
 			return;
 		}
