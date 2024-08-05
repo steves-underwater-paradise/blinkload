@@ -1,6 +1,5 @@
 package io.github.steveplays28.blinkload.client.cache;
 
-import io.github.steveplays28.blinkload.BlinkLoad;
 import io.github.steveplays28.blinkload.client.event.ClientLifecycleEvent;
 import io.github.steveplays28.blinkload.util.CacheUtil;
 import io.github.steveplays28.blinkload.util.ThreadUtil;
@@ -12,6 +11,8 @@ import net.fabricmc.api.Environment;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -20,8 +21,11 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
+import static io.github.steveplays28.blinkload.BlinkLoad.MOD_ID;
+
 @Environment(EnvType.CLIENT)
 public class BlinkLoadCache {
+	private static final Logger LOGGER = LoggerFactory.getLogger(String.format("%s/cache", MOD_ID));
 	private static final @NotNull File CACHED_DATA_FILE = new File(
 			String.format("%s/atlas_textures_cache.json", CacheUtil.getCachePath()));
 
@@ -57,7 +61,7 @@ public class BlinkLoadCache {
 			).whenCompleteAsync(
 					(cachedData, throwable) -> {
 						if (throwable != null) {
-							BlinkLoad.LOGGER.error(
+							LOGGER.error(
 									"Exception thrown while trying to load the atlas texture cache: ",
 									ExceptionUtils.getRootCause(throwable)
 							);
@@ -81,6 +85,10 @@ public class BlinkLoadCache {
 
 	@SuppressWarnings("ForLoopReplaceableByForEach")
 	private static @NotNull Map<AtlasTextureIdentifier, StitchResult> loadCachedData() {
+		if (!isUpToDate()) {
+			return new ConcurrentHashMap<>();
+		}
+
 		var startTime = System.nanoTime();
 
 		@NotNull Map<AtlasTextureIdentifier, StitchResult> cachedData = new ConcurrentHashMap<>();
@@ -93,7 +101,7 @@ public class BlinkLoadCache {
 				cachedData.put(new AtlasTextureIdentifier(stitchResult.getAtlasTextureId(), stitchResult.getMipLevel()), stitchResult);
 			}
 
-			BlinkLoad.LOGGER.info(
+			LOGGER.info(
 					"Loaded atlas textures from cache (took {}ms).",
 					TimeUnit.MILLISECONDS.convert(System.nanoTime() - startTime, TimeUnit.NANOSECONDS)
 			);
@@ -110,7 +118,7 @@ public class BlinkLoadCache {
 		}
 
 		try {
-			BlinkLoad.LOGGER.info("Atlas creation finished, writing cache data to file ({}).", CACHED_DATA_FILE);
+			LOGGER.info("Atlas creation finished, writing cache data to file ({}).", CACHED_DATA_FILE);
 
 			// TODO: Add error handling
 			CACHED_DATA_FILE.getParentFile().mkdirs();
@@ -119,7 +127,7 @@ public class BlinkLoadCache {
 			file.write(JsonUtil.getGson().toJson(getCachedData().values()));
 			file.close();
 		} catch (IOException e) {
-			BlinkLoad.LOGGER.error("Exception thrown while writing cache data to file ({}): {}", e, CACHED_DATA_FILE);
+			LOGGER.error("Exception thrown while writing cache data to file ({}): {}", e, CACHED_DATA_FILE);
 		}
 	}
 }
