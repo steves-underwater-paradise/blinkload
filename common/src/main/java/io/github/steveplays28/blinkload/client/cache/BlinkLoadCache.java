@@ -9,6 +9,7 @@ import io.github.steveplays28.blinkload.util.resource.json.JsonUtil;
 import io.github.steveplays28.blinkload.util.resource.json.StitchResult;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -24,7 +25,7 @@ public class BlinkLoadCache {
 	private static final @NotNull File CACHED_DATA_FILE = new File(
 			String.format("%s/atlas_textures_cache.json", CacheUtil.getCachePath()));
 
-	private static @Nullable CompletableFuture<Void> cachedDataCompletableFuture = null;
+	private static @Nullable CompletableFuture<Map<AtlasTextureIdentifier, StitchResult>> cachedDataCompletableFuture = null;
 	private static @Nullable Map<AtlasTextureIdentifier, StitchResult> cachedData = null;
 	private static @Nullable Boolean isUpToDate = null;
 
@@ -49,10 +50,22 @@ public class BlinkLoadCache {
 		return cachedData;
 	}
 
-	public static @NotNull CompletableFuture<Void> loadCachedDataAsync() {
+	public static @NotNull CompletableFuture<Map<AtlasTextureIdentifier, StitchResult>> loadCachedDataAsync() {
 		if (cachedDataCompletableFuture == null) {
-			cachedDataCompletableFuture = CompletableFuture.runAsync(
-					BlinkLoadCache::loadCachedData, ThreadUtil.getAtlasTextureLoaderThreadPoolExecutor());
+			cachedDataCompletableFuture = CompletableFuture.supplyAsync(
+					BlinkLoadCache::loadCachedData, ThreadUtil.getAtlasTextureLoaderThreadPoolExecutor()
+			).whenCompleteAsync(
+					(cachedData, throwable) -> {
+						if (throwable != null) {
+							BlinkLoad.LOGGER.error(
+									"Exception thrown while trying to load the atlas texture cache: ",
+									ExceptionUtils.getRootCause(throwable)
+							);
+						}
+
+						BlinkLoadCache.cachedData = cachedData;
+					}
+			);
 		}
 
 		return cachedDataCompletableFuture;
@@ -67,10 +80,10 @@ public class BlinkLoadCache {
 	}
 
 	@SuppressWarnings("ForLoopReplaceableByForEach")
-	private static void loadCachedData() {
+	private static @NotNull Map<AtlasTextureIdentifier, StitchResult> loadCachedData() {
 		var startTime = System.nanoTime();
 
-		cachedData = new ConcurrentHashMap<>();
+		@NotNull Map<AtlasTextureIdentifier, StitchResult> cachedData = new ConcurrentHashMap<>();
 		// Read JSON from the cached data file
 		try (@NotNull Reader reader = new FileReader(CACHED_DATA_FILE)) {
 			// Convert the JSON data to a Java object
@@ -87,6 +100,8 @@ public class BlinkLoadCache {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
+
+		return cachedData;
 	}
 
 	private static void writeCacheDataToFile() {
