@@ -6,6 +6,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.texture.NativeImage;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.lwjgl.system.MemoryUtil;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -32,7 +33,13 @@ public class NativeImageAdapter implements JsonSerializer<NativeImage>, JsonDese
 		byte[] nativeImageBytes = context.deserialize(json, byte[].class);
 
 		try {
-			return NativeImage.read(nativeImageBytes);
+			var byteBuffer = MemoryUtil.memAlloc(nativeImageBytes.length);
+			byteBuffer.put(nativeImageBytes);
+			byteBuffer.rewind();
+
+			var nativeImage = NativeImage.read(byteBuffer);
+			MemoryUtil.memFree(byteBuffer);
+			return nativeImage;
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
