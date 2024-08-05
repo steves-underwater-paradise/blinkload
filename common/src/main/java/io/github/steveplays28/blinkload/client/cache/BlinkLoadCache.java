@@ -20,20 +20,19 @@ public class BlinkLoadCache {
 			String.format("%s/atlas_textures_cache.json", CacheUtil.getCachePath()));
 
 	private static @Nullable Map<Identifier, StitchResult> CACHED_DATA = null;
-
-	private static boolean hasFirstResourceReloadFinished = false;
+	private static @Nullable Boolean isUpToDate = null;
 
 	public static void initialize() {
-		ClientLifecycleEvent.CLIENT_RESOURCE_RELOAD_FINISHED.register(BlinkLoadCache::onFirstResourceReload);
-	}
-
-	public static boolean hasFirstResourceReloadFinished() {
-		return hasFirstResourceReloadFinished;
+		ClientLifecycleEvent.CLIENT_RESOURCE_RELOAD_FINISHED.register(BlinkLoadCache::onClientResourceReloadFinished);
 	}
 
 	public static boolean isUpToDate() {
-		// TODO: Compare the mod list's hash
-		return Files.exists(CACHED_DATA_FILE.toPath());
+		if (isUpToDate == null) {
+			// TODO: Compare the mod list's hash
+			isUpToDate = Files.exists(CACHED_DATA_FILE.toPath());
+		}
+
+		return isUpToDate;
 	}
 
 	@SuppressWarnings("ForLoopReplaceableByForEach")
@@ -67,15 +66,18 @@ public class BlinkLoadCache {
 		getCachedData().put(stitchResult.getAtlasTextureId(), stitchResult);
 	}
 
-	private static void onFirstResourceReload() {
-		hasFirstResourceReloadFinished = true;
-		// TODO: Don't write the cache every time the game starts in the render thread
-		BlinkLoad.LOGGER.info("Atlas creation finished. Caching data to JSON.");
+	private static void onClientResourceReloadFinished() {
 		writeCacheDataToFile();
 	}
 
 	private static void writeCacheDataToFile() {
+		if (!isUpToDate()) {
+			return;
+		}
+
 		try {
+			BlinkLoad.LOGGER.info("Atlas creation finished, writing cache data to file ({}).", CACHED_DATA_FILE);
+
 			// TODO: Add error handling
 			CACHED_DATA_FILE.getParentFile().mkdirs();
 
