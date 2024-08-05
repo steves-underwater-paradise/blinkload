@@ -34,7 +34,8 @@ public class BlinkLoadCache {
 	private static @Nullable Boolean isUpToDate = null;
 
 	public static void initialize() {
-		ClientLifecycleEvent.CLIENT_RESOURCE_RELOAD_FINISHED.register(BlinkLoadCache::onClientResourceReloadFinished);
+		ClientLifecycleEvent.CLIENT_MAIN_STARTING.register(BlinkLoadCache::loadCachedDataAsync);
+		ClientLifecycleEvent.CLIENT_RESOURCE_RELOAD_FINISHED.register(BlinkLoadCache::writeCacheDataToFile);
 	}
 
 	public static boolean isUpToDate() {
@@ -54,7 +55,11 @@ public class BlinkLoadCache {
 		return cachedData;
 	}
 
-	public static @NotNull CompletableFuture<Map<AtlasTextureIdentifier, StitchResult>> loadCachedDataAsync() {
+	public static void cacheData(@NotNull StitchResult stitchResult) {
+		getCachedData().put(new AtlasTextureIdentifier(stitchResult.getAtlasTextureId(), stitchResult.getMipLevel()), stitchResult);
+	}
+
+	private static @NotNull CompletableFuture<Map<AtlasTextureIdentifier, StitchResult>> loadCachedDataAsync() {
 		if (cachedDataCompletableFuture == null) {
 			cachedDataCompletableFuture = CompletableFuture.supplyAsync(
 					BlinkLoadCache::loadCachedData, ThreadUtil.getAtlasTextureLoaderThreadPoolExecutor()
@@ -73,14 +78,6 @@ public class BlinkLoadCache {
 		}
 
 		return cachedDataCompletableFuture;
-	}
-
-	public static void cacheData(@NotNull StitchResult stitchResult) {
-		getCachedData().put(new AtlasTextureIdentifier(stitchResult.getAtlasTextureId(), stitchResult.getMipLevel()), stitchResult);
-	}
-
-	private static void onClientResourceReloadFinished() {
-		writeCacheDataToFile();
 	}
 
 	@SuppressWarnings("ForLoopReplaceableByForEach")

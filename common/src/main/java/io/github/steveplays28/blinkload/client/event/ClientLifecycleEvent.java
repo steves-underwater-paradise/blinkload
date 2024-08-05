@@ -8,12 +8,24 @@ import net.fabricmc.api.Environment;
 @Environment(EnvType.CLIENT)
 public interface ClientLifecycleEvent {
 	/**
-	 * @see ClientStarted
+	 * @see ClientMainStarting
 	 */
-	Event<ClientStarted> CLIENT_RESOURCE_RELOAD_FINISHED = EventFactory.createLoop();
+	Event<ClientMainStarting> CLIENT_MAIN_STARTING = EventFactory.createLoop();
+	/**
+	 * @see ClientResourceReloadFinished
+	 */
+	Event<ClientResourceReloadFinished> CLIENT_RESOURCE_RELOAD_FINISHED = EventFactory.createLoop();
 
 	@FunctionalInterface
-	interface ClientStarted {
+	interface ClientMainStarting {
+		/**
+		 * Invoked when the client starts.
+		 */
+		void onClientMainStarting();
+	}
+
+	@FunctionalInterface
+	interface ClientResourceReloadFinished {
 		/**
 		 * Invoked when the client has finished resource reloading.
 		 */

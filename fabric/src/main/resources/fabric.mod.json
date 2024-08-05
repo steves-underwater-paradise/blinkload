@@ -31,14 +31,8 @@
   },
   "environment": "*",
   "entrypoints": {
-    "client": [
-      "io.github.steveplays28.blinkload.fabric.client.BlinkLoadClientFabric"
-    ],
     "main": [
       "io.github.steveplays28.blinkload.fabric.BlinkLoadFabric"
-    ],
-    "preLaunch": [
-      "io.github.steveplays28.blinkload.fabric.client.BlinkLoadClientPreLaunchFabric"
     ]
   },
   "mixins": [
