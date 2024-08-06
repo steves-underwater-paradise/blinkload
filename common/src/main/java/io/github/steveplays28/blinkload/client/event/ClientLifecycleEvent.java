@@ -12,6 +12,10 @@ public interface ClientLifecycleEvent {
 	 */
 	Event<ClientMainStarting> CLIENT_MAIN_STARTING = EventFactory.createLoop();
 	/**
+	 * @see BeforeBootstrapFinishInitialization
+	 */
+	Event<BeforeBootstrapFinishInitialization> BEFORE_BOOTSTRAP_FINISH_INITIALIZATION = EventFactory.createLoop();
+	/**
 	 * @see ClientResourceReloadFinished
 	 */
 	Event<ClientResourceReloadFinished> CLIENT_RESOURCE_RELOAD_FINISHED = EventFactory.createLoop();
@@ -22,6 +26,14 @@ public interface ClientLifecycleEvent {
 		 * Invoked when the client starts.
 		 */
 		void onClientMainStarting();
+	}
+
+	@FunctionalInterface
+	interface BeforeBootstrapFinishInitialization {
+		/**
+		 * Invoked when the {@link net.minecraft.Bootstrap} is accessed for the first time and needs to finish initialization.
+		 */
+		void onBeforeBootstrapFinishInitialization();
 	}
 
 	@FunctionalInterface
