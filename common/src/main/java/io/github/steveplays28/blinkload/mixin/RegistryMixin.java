@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(Registry.class)
 public interface RegistryMixin {
 	@Inject(method = "getOrThrow", at = @At(value = "HEAD"))
-	private void blinkload$waitForBootstrappingToFinish(RegistryKey<?> key, @NotNull CallbackInfoReturnable<?> cir) {
+	private void blinkload$waitForBootstrapInitializationToFinish(RegistryKey<?> key, @NotNull CallbackInfoReturnable<?> cir) {
 		ClientLifecycleEvent.BEFORE_BOOTSTRAP_FINISH_INITIALIZATION.invoker().onBeforeBootstrapFinishInitialization();
 	}
 }
