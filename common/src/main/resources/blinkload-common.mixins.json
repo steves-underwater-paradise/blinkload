@@ -3,12 +3,14 @@
   "minVersion": "0.8",
   "package": "io.github.steveplays28.blinkload.mixin",
   "compatibilityLevel": "JAVA_17",
-  "mixins": [],
+  "mixins": [
+    "server.ServerMainMixin"
+  ],
   "client": [
     "client.MinecraftClientMixin",
     "client.SpriteLoaderMixin",
     "client.accessor.SpriteContentsAccessor",
-    "client.main.MainMixin"
+    "client.main.ClientMainMixin"
   ],
   "injectors": {
     "defaultRequire": 1
