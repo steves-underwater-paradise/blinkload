@@ -13,6 +13,7 @@
     "client.MinecraftClientMixin",
     "client.SpriteLoaderMixin",
     "client.accessor.SpriteContentsAccessor",
+    "client.blaze3d.platform.GLXMixin",
     "client.main.ClientMainMixin"
   ],
   "injectors": {

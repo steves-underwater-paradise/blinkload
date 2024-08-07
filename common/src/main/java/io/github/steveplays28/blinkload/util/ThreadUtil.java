@@ -14,6 +14,8 @@ public class ThreadUtil {
 			1, new ThreadFactoryBuilder().setNameFormat(String.format("%s Atlas Texture Loader", BlinkLoad.MOD_NAME)).build());
 	private static final @NotNull Executor BOOTSTRAP_INITIALIZER_THREAD_POOL_EXECUTOR = Executors.newFixedThreadPool(
 			1, new ThreadFactoryBuilder().setNameFormat(BOOTSTRAPPER_THREAD_POOL_NAME).build());
+	private static final @NotNull Executor GLX_INITIALIXER_THREAD_POOL_EXECUTOR = Executors.newFixedThreadPool(
+			1, new ThreadFactoryBuilder().setNameFormat(String.format("%s GLX Initializer", BlinkLoad.MOD_NAME)).build());
 
 	public static @NotNull Executor getAtlasTextureLoaderThreadPoolExecutor() {
 		return ATLAS_TEXTURE_LOADER_THREAD_POOL_EXECUTOR;
@@ -21,5 +23,9 @@ public class ThreadUtil {
 
 	public static @NotNull Executor getBootstrapInitializerThreadPoolExecutor() {
 		return BOOTSTRAP_INITIALIZER_THREAD_POOL_EXECUTOR;
+	}
+
+	public static @NotNull Executor getGLXInitializerThreadPoolExecutor() {
+		return GLX_INITIALIXER_THREAD_POOL_EXECUTOR;
 	}
 }
