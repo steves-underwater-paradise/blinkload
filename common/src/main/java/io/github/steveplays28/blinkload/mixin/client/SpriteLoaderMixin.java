@@ -1,5 +1,6 @@
 package io.github.steveplays28.blinkload.mixin.client;
 
+import io.github.steveplays28.blinkload.BlinkLoad;
 import io.github.steveplays28.blinkload.client.cache.BlinkLoadCache;
 import io.github.steveplays28.blinkload.mixin.client.accessor.SpriteContentsAccessor;
 import io.github.steveplays28.blinkload.util.resource.json.AtlasTextureIdentifier;

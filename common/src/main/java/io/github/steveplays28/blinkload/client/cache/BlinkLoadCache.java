@@ -33,26 +33,26 @@ public class BlinkLoadCache {
 
 	private static @Nullable CompletableFuture<Map<AtlasTextureIdentifier, StitchResult>> cachedDataCompletableFuture = null;
 	private static @Nullable Map<AtlasTextureIdentifier, StitchResult> cachedData = null;
-	private static @Nullable Boolean isUpToDate = null;
+	public static @Nullable Boolean isUpToDate = null;
 
 	public static void initialize() {
 		ClientLifecycleEvent.CLIENT_MAIN_STARTING.register(BlinkLoadCache::loadCachedDataAsync);
 		ClientLifecycleEvent.CLIENT_RESOURCE_RELOAD_FINISHED.register(BlinkLoadCache::writeCacheDataToFile);
+		isUpToDate = HashUtil.compareHashes(HashUtil.getHashedList(HashUtil.getModList()));
 	}
 
 	public static boolean isUpToDate() {
-		if (isUpToDate == null) {
+		if (Boolean.FALSE.equals(isUpToDate) || !Files.exists(CACHED_DATA_FILE.toPath())) {
 			// TODO: Compare the mod list's hash
-			isUpToDate = Files.exists(CACHED_DATA_FILE.toPath());
+			BlinkLoad.LOGGER.info("CACHE IS NOT UP TO DATE, GENERATE NEW");
+			String hash = HashUtil.getHashedList(HashUtil.getModList());
+			BlinkLoad.LOGGER.info(hash);
+
+			HashUtil.saveHash(hash);
+			isUpToDate = false;
 		}
-
-		String modList = HashUtil.getModList();
-		String hashedList = HashUtil.getHashedList(modList);
-
-		BlinkLoad.LOGGER.info(hashedList);
-
-		return isUpToDate;
-	}
+        return Boolean.TRUE.equals(isUpToDate);
+    }
 
 	public static @NotNull Map<AtlasTextureIdentifier, StitchResult> getCachedData() {
 		if (cachedData == null) {
