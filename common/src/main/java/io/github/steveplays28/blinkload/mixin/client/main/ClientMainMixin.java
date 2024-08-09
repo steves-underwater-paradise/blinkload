@@ -3,6 +3,7 @@ package io.github.steveplays28.blinkload.mixin.client.main;
 import io.github.steveplays28.blinkload.BlinkLoad;
 import io.github.steveplays28.blinkload.client.cache.BlinkLoadCache;
 import io.github.steveplays28.blinkload.client.event.ClientLifecycleEvent;
+import io.github.steveplays28.blinkload.event.LifecycleEvent;
 import io.github.steveplays28.blinkload.util.ThreadUtil;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -35,7 +36,7 @@ public class ClientMainMixin {
 		BlinkLoadCache.initialize();
 		ClientLifecycleEvent.CLIENT_MAIN_STARTING.invoker().onClientMainStarting();
 
-		ClientLifecycleEvent.BEFORE_BOOTSTRAP_FINISH_INITIALIZATION.register(
+		LifecycleEvent.BEFORE_BOOTSTRAP_FINISH_INITIALIZATION.register(
 				ClientMainMixin::blinkload$onBeforeBoostrapFinishInitialization);
 		blinkload$bootstrapInitializationCompletableFuture = CompletableFuture.runAsync(
 				Bootstrap::initialize, ThreadUtil.getBootstrapInitializerThreadPoolExecutor());
@@ -75,7 +76,7 @@ public class ClientMainMixin {
 		GameLoadTimeEvent.INSTANCE.setBootstrapTime(Bootstrap.LOAD_TIME.get());
 		Bootstrap.logMissing();
 		BlinkLoad.LOGGER.info(
-				"Waited for bootstrapping to finish (took {}ms)",
+				"Waited for bootstrap initialization to finish (took {}ms)",
 				TimeUnit.MILLISECONDS.convert(System.nanoTime() - startTime, TimeUnit.NANOSECONDS)
 		);
 	}

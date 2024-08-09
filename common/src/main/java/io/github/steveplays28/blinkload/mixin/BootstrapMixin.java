@@ -1,6 +1,6 @@
 package io.github.steveplays28.blinkload.mixin;
 
-import io.github.steveplays28.blinkload.client.event.ClientLifecycleEvent;
+import io.github.steveplays28.blinkload.event.LifecycleEvent;
 import io.github.steveplays28.blinkload.util.ThreadUtil;
 import net.minecraft.Bootstrap;
 import org.jetbrains.annotations.NotNull;
@@ -22,7 +22,7 @@ public class BootstrapMixin {
 			return;
 		}
 
-		ClientLifecycleEvent.BEFORE_BOOTSTRAP_FINISH_INITIALIZATION.invoker().onBeforeBootstrapFinishInitialization();
+		LifecycleEvent.BEFORE_BOOTSTRAP_FINISH_INITIALIZATION.invoker().onBeforeBootstrapFinishInitialization();
 		blinkload$hasFinished = true;
 	}
 
