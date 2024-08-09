@@ -1,4 +1,4 @@
-package io.github.steveplays28.blinkload.mixin;
+package io.github.steveplays28.blinkload.mixin.block;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;

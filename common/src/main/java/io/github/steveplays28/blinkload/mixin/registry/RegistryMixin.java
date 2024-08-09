@@ -1,4 +1,4 @@
-package io.github.steveplays28.blinkload.mixin;
+package io.github.steveplays28.blinkload.mixin.registry;
 
 import io.github.steveplays28.blinkload.client.event.ClientLifecycleEvent;
 import io.github.steveplays28.blinkload.util.ThreadUtil;
