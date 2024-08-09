@@ -1,7 +1,9 @@
 package io.github.steveplays28.blinkload.client.cache;
 
+import io.github.steveplays28.blinkload.BlinkLoad;
 import io.github.steveplays28.blinkload.client.event.ClientLifecycleEvent;
 import io.github.steveplays28.blinkload.util.CacheUtil;
+import io.github.steveplays28.blinkload.util.HashUtil;
 import io.github.steveplays28.blinkload.util.ThreadUtil;
 import io.github.steveplays28.blinkload.util.resource.json.AtlasTextureIdentifier;
 import io.github.steveplays28.blinkload.util.resource.json.JsonUtil;
@@ -43,6 +45,11 @@ public class BlinkLoadCache {
 			// TODO: Compare the mod list's hash
 			isUpToDate = Files.exists(CACHED_DATA_FILE.toPath());
 		}
+
+		String modList = HashUtil.getModList();
+		String hashedList = HashUtil.getHashedList(modList);
+
+		BlinkLoad.LOGGER.info(hashedList);
 
 		return isUpToDate;
 	}
