@@ -38,7 +38,7 @@ dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
 
     // Architectury API
-    modRuntimeOnly("dev.architectury:architectury-fabric:${rootProject.architectury_api_version}") {
+    modImplementation("dev.architectury:architectury-fabric:${rootProject.architectury_api_version}") {
         exclude group: 'net.fabricmc', module: 'fabric-loader'
     }
 
@@ -66,7 +66,9 @@ processResources {
                 "curseforge_project_id": rootProject.curseforge_project_id,
                 "modrinth_project_id": rootProject.modrinth_project_id,
                 "fabric_loader_version": rootProject.fabric_loader_version,
-                "supported_minecraft_version": rootProject.supported_minecraft_version
+                "supported_minecraft_version": rootProject.supported_minecraft_version,
+                "fabric_api_version": rootProject.fabric_api_version,
+                "architectury_api_version": rootProject.architectury_api_version
     }
 }
 
