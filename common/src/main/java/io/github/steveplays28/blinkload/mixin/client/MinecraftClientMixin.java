@@ -16,8 +16,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Environment(EnvType.CLIENT)
 @Mixin(MinecraftClient.class)
 public class MinecraftClientMixin {
-    @Inject(method = "onInitFinished", at = @At(value = "HEAD"))
-    private void blinkload$invokeAfterResourceReloadEvent(RealmsClient realms, @NotNull ResourceReload reload, RunArgs.QuickPlay quickPlay, @NotNull CallbackInfo ci) {
-        reload.whenComplete().thenAccept(o -> ClientLifecycleEvent.CLIENT_RESOURCE_RELOAD_FINISHED.invoker().onClientResourceReloadFinished());
-    }
+	@Inject(method = "onInitFinished", at = @At(value = "HEAD"))
+	private void blinkload$invokeAfterResourceReloadEvent(RealmsClient realms, @NotNull ResourceReload reload, RunArgs.QuickPlay quickPlay, @NotNull CallbackInfo ci) {
+		reload.whenComplete().thenAccept(
+				o -> ClientLifecycleEvent.CLIENT_RESOURCE_RELOAD_FINISHED.invoker().onClientResourceReloadFinished());
+	}
 }

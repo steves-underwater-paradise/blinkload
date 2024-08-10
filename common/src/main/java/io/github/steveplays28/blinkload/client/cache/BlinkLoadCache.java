@@ -2,6 +2,7 @@ package io.github.steveplays28.blinkload.client.cache;
 
 import io.github.steveplays28.blinkload.client.event.ClientLifecycleEvent;
 import io.github.steveplays28.blinkload.util.CacheUtil;
+import io.github.steveplays28.blinkload.util.HashUtil;
 import io.github.steveplays28.blinkload.util.ThreadUtil;
 import io.github.steveplays28.blinkload.util.resource.json.AtlasTextureIdentifier;
 import io.github.steveplays28.blinkload.util.resource.json.JsonUtil;
@@ -16,7 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.file.Files;
-import java.util.*;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -32,6 +33,7 @@ public class BlinkLoadCache {
 	private static @Nullable CompletableFuture<Map<AtlasTextureIdentifier, StitchResult>> cachedDataCompletableFuture = null;
 	private static @Nullable Map<AtlasTextureIdentifier, StitchResult> cachedData = null;
 	private static @Nullable Boolean isUpToDate = null;
+	private static String currentHash = HashUtil.calculateHash(HashUtil.getModList());
 
 	public static void initialize() {
 		ClientLifecycleEvent.CLIENT_MAIN_STARTING.register(BlinkLoadCache::loadCachedDataAsync);
@@ -40,8 +42,7 @@ public class BlinkLoadCache {
 
 	public static boolean isUpToDate() {
 		if (isUpToDate == null) {
-			// TODO: Compare the mod list's hash
-			isUpToDate = Files.exists(CACHED_DATA_FILE.toPath());
+			isUpToDate = Files.exists(CACHED_DATA_FILE.toPath()) && HashUtil.compareHashes(currentHash);
 		}
 
 		return isUpToDate;
@@ -119,6 +120,7 @@ public class BlinkLoadCache {
 
 			// TODO: Add error handling
 			CACHED_DATA_FILE.getParentFile().mkdirs();
+			HashUtil.saveHash(currentHash);
 
 			@NotNull var file = new FileWriter(CACHED_DATA_FILE);
 			file.write(JsonUtil.getGson().toJson(getCachedData().values()));
