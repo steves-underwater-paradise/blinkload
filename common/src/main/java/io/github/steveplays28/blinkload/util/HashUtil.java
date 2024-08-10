@@ -2,8 +2,6 @@ package io.github.steveplays28.blinkload.util;
 
 import com.google.common.hash.Hashing;
 import io.github.steveplays28.blinkload.BlinkLoad;
-import net.fabricmc.loader.api.FabricLoader;
-import net.fabricmc.loader.api.ModContainer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -11,7 +9,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -21,21 +18,21 @@ public class HashUtil {
     private static final @NotNull String[] filterArray = {"generated_"};
 
     public static @NotNull String getModList() {
-        List<ModContainer> mods = new ArrayList<>(FabricLoader.getInstance().getAllMods());
+        @NotNull List<String> modListNames = ModUtil.getModListNames();
         // Alphabetically sort the mod list
-        mods.sort((mod1, mod2) -> mod1.toString().compareToIgnoreCase(mod2.toString()));
+        modListNames.sort(String::compareToIgnoreCase);
 
         @NotNull StringBuilder modNames = new StringBuilder();
-        for (@NotNull ModContainer mod : mods) {
-            if (Arrays.stream(filterArray).anyMatch(mod.toString()::startsWith)) {
-                BlinkLoad.LOGGER.info("Mod: {} Contains a filtered prefix.", mod);
+        for (@NotNull String modName : modListNames) {
+            if (Arrays.stream(filterArray).anyMatch(modName::startsWith)) {
+                BlinkLoad.LOGGER.info("Mod: {} Contains a filtered prefix.", modName);
                 continue;
             }
 
             if (!modNames.isEmpty()) {
                 modNames.append(", ");
             }
-            modNames.append(mod);
+            modNames.append(modName);
         }
 
         return modNames.toString();

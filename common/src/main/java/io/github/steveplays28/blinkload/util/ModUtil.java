@@ -4,6 +4,7 @@ import dev.architectury.injectables.annotations.ExpectPlatform;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
+import java.util.List;
 
 @SuppressWarnings("unused")
 public abstract class ModUtil {
@@ -20,6 +21,11 @@ public abstract class ModUtil {
 	 */
 	@ExpectPlatform
 	public static @NotNull Path getGameDirectory() {
+		throw new AssertionError("Platform implementation expected.");
+	}
+
+	@ExpectPlatform
+	public static @NotNull List<String> getModListNames() {
 		throw new AssertionError("Platform implementation expected.");
 	}
 }

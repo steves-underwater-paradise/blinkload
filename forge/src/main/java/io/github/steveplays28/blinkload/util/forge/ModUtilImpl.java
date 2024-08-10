@@ -1,11 +1,14 @@
 package io.github.steveplays28.blinkload.util.forge;
 
 import io.github.steveplays28.blinkload.util.ModUtil;
+import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.fml.loading.LoadingModList;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Implements {@link ModUtil}.
@@ -24,5 +27,13 @@ public class ModUtilImpl {
 	 */
 	public static @NotNull Path getGameDirectory() {
 		return FMLPaths.GAMEDIR.get();
+	}
+
+	public static @NotNull List<String> getModListNames() {
+        @NotNull List<String> modListNames = new ArrayList<>();
+		for (@NotNull var mod : FMLLoader.getLoadingModList().getMods()) {
+			modListNames.add(mod.toString());
+		}
+		return modListNames;
 	}
 }

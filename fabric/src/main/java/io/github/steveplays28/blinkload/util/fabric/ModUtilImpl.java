@@ -5,6 +5,8 @@ import net.fabricmc.loader.api.FabricLoader;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Implements {@link ModUtil}.
@@ -23,5 +25,13 @@ public class ModUtilImpl {
 	 */
 	public static @NotNull Path getGameDirectory() {
 		return FabricLoader.getInstance().getGameDir().toAbsolutePath();
+	}
+
+	public static @NotNull List<String> getModListNames() {
+        @NotNull List<String> modListNames = new ArrayList<>();
+		for (@NotNull var mod : new ArrayList<>(FabricLoader.getInstance().getAllMods())) {
+			modListNames.add(mod.toString());
+		}
+		return modListNames;
 	}
 }
