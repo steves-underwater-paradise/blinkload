@@ -1,6 +1,5 @@
 package io.github.steveplays28.blinkload.client.cache;
 
-import io.github.steveplays28.blinkload.BlinkLoad;
 import io.github.steveplays28.blinkload.client.event.ClientLifecycleEvent;
 import io.github.steveplays28.blinkload.util.CacheUtil;
 import io.github.steveplays28.blinkload.util.HashUtil;
@@ -33,25 +32,20 @@ public class BlinkLoadCache {
 
 	private static @Nullable CompletableFuture<Map<AtlasTextureIdentifier, StitchResult>> cachedDataCompletableFuture = null;
 	private static @Nullable Map<AtlasTextureIdentifier, StitchResult> cachedData = null;
-	public static @Nullable Boolean isUpToDate = null;
+	private static @Nullable Boolean isUpToDate = null;
+	private static String currentHash = HashUtil.calculateHash(HashUtil.getModList());
 
 	public static void initialize() {
 		ClientLifecycleEvent.CLIENT_MAIN_STARTING.register(BlinkLoadCache::loadCachedDataAsync);
 		ClientLifecycleEvent.CLIENT_RESOURCE_RELOAD_FINISHED.register(BlinkLoadCache::writeCacheDataToFile);
-		isUpToDate = HashUtil.compareHashes(HashUtil.getHashedList(HashUtil.getModList()));
 	}
 
 	public static boolean isUpToDate() {
-		if (Boolean.FALSE.equals(isUpToDate) || !Files.exists(CACHED_DATA_FILE.toPath())) {
-			// TODO: Compare the mod list's hash
-			BlinkLoad.LOGGER.info("CACHE IS NOT UP TO DATE, GENERATE NEW");
-			String hash = HashUtil.getHashedList(HashUtil.getModList());
-			BlinkLoad.LOGGER.info(hash);
-
-			HashUtil.saveHash(hash);
-			isUpToDate = false;
+		if (isUpToDate == null) {
+            isUpToDate = Files.exists(CACHED_DATA_FILE.toPath()) && HashUtil.compareHashes(currentHash);
 		}
-        return Boolean.TRUE.equals(isUpToDate);
+
+        return isUpToDate;
     }
 
 	public static @NotNull Map<AtlasTextureIdentifier, StitchResult> getCachedData() {
@@ -126,6 +120,7 @@ public class BlinkLoadCache {
 
 			// TODO: Add error handling
 			CACHED_DATA_FILE.getParentFile().mkdirs();
+			HashUtil.saveHash(currentHash);
 
 			@NotNull var file = new FileWriter(CACHED_DATA_FILE);
 			file.write(JsonUtil.getGson().toJson(getCachedData().values()));
