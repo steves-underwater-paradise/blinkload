@@ -1,6 +1,7 @@
 package io.github.steveplays28.blinkload.client.cache;
 
 import io.github.steveplays28.blinkload.client.event.ClientLifecycleEvent;
+import io.github.steveplays28.blinkload.config.BlinkLoadConfig;
 import io.github.steveplays28.blinkload.util.CacheUtil;
 import io.github.steveplays28.blinkload.util.ThreadUtil;
 import io.github.steveplays28.blinkload.util.resource.json.AtlasTextureIdentifier;
@@ -8,6 +9,7 @@ import io.github.steveplays28.blinkload.util.resource.json.JsonUtil;
 import io.github.steveplays28.blinkload.util.resource.json.StitchResult;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.text.Text;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -98,10 +100,9 @@ public class BlinkLoadCache {
 				cachedData.put(new AtlasTextureIdentifier(stitchResult.getAtlasTextureId(), stitchResult.getMipLevel()), stitchResult);
 			}
 
-			LOGGER.info(
-					"Loaded atlas textures from cache (took {}ms).",
-					TimeUnit.MILLISECONDS.convert(System.nanoTime() - startTime, TimeUnit.NANOSECONDS)
-			);
+			var atlasTextureCacheLoadTime = TimeUnit.MILLISECONDS.convert(System.nanoTime() - startTime, TimeUnit.NANOSECONDS);
+			BlinkLoadConfig.HANDLER.instance().setPreviousAtlasTextureCacheLoadTime(atlasTextureCacheLoadTime);
+			LOGGER.info("Loaded atlas textures from cache (took {}ms).", atlasTextureCacheLoadTime);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

@@ -45,6 +45,10 @@ allprojects {
             name = "NeoForged"
             url = "https://maven.neoforged.net/releases/"
         }
+        maven {
+            name "Xander Maven"
+            url "https://maven.isxander.dev/releases"
+        }
     }
 
     tasks.withType(JavaCompile).configureEach {

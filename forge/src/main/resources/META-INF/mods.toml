@@ -7,7 +7,7 @@ issueTrackerURL = "https://github.com/steves-underwater-paradise/${mod_id}/issue
 modId = "${mod_id}"
 version = "${version}"
 displayName = "${mod_name}"
-authors = "Steveplays28"
+authors = "Steveplays28, BartolJukica"
 description = '''
 ${mod_description}
 '''
@@ -37,5 +37,12 @@ side = "BOTH"
 modId = "architectury"
 mandatory = true
 versionRange = ">=${architectury_api_version}"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "yet_another_config_lib_v3"
+mandatory = true
+versionRange = ">=${yet_another_config_lib_version}"
 ordering = "NONE"
 side = "BOTH"

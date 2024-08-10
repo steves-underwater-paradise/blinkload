@@ -27,6 +27,12 @@ dependencies {
     modApi("dev.architectury:architectury:${rootProject.architectury_api_version}") {
         exclude group: 'net.fabricmc', module: 'fabric-loader'
     }
+
+    // YetAnotherConfigLib
+    modImplementation("dev.isxander:yet-another-config-lib:${rootProject.yet_another_config_lib_version}-fabric")
+
+    // Mod Menu
+    modImplementation "maven.modrinth:modmenu:${rootProject.mod_menu_version}"
 }
 
 publishing {

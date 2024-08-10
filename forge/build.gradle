@@ -44,6 +44,9 @@ dependencies {
     // Architectury API
     modImplementation("dev.architectury:architectury-forge:${rootProject.architectury_api_version}")
 
+    // YetAnotherConfigLib
+    modRuntimeOnly("dev.isxander:yet-another-config-lib:${rootProject.yet_another_config_lib_version}-forge")
+
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
 }
@@ -67,7 +70,8 @@ processResources {
                 "modrinth_project_id": rootProject.modrinth_project_id,
                 "forge_version": rootProject.neoforge_version,
                 "supported_minecraft_version": rootProject.supported_minecraft_version,
-                "architectury_api_version": rootProject.architectury_api_version
+                "architectury_api_version": rootProject.architectury_api_version,
+                "yet_another_config_lib_version": rootProject.yet_another_config_lib_version
     }
 }
 

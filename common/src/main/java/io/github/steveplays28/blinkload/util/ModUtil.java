@@ -22,4 +22,8 @@ public abstract class ModUtil {
 	public static @NotNull Path getGameDirectory() {
 		throw new AssertionError("Platform implementation expected.");
 	}
+
+	public static @NotNull Path getConfigDirectory() {
+		return getGameDirectory().resolve("config");
+	}
 }
