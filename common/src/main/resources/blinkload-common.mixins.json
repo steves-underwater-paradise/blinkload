@@ -5,10 +5,10 @@
   "compatibilityLevel": "JAVA_17",
   "mixins": [],
   "client": [
-    "client.main.MainMixin",
     "client.MinecraftClientMixin",
     "client.SpriteLoaderMixin",
-    "client.accessor.SpriteContentsAccessor"
+    "client.accessor.SpriteContentsAccessor",
+    "client.main.MainMixin"
   ],
   "injectors": {
     "defaultRequire": 1

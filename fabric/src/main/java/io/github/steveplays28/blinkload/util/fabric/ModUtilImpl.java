@@ -28,7 +28,7 @@ public class ModUtilImpl {
 	}
 
 	public static @NotNull List<String> getModListNames() {
-        @NotNull List<String> modListNames = new ArrayList<>();
+		@NotNull List<String> modListNames = new ArrayList<>();
 		for (@NotNull var mod : new ArrayList<>(FabricLoader.getInstance().getAllMods())) {
 			modListNames.add(mod.toString());
 		}

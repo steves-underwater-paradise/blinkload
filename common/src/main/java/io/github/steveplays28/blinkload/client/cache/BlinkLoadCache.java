@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.file.Files;
-import java.util.*;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -42,11 +42,11 @@ public class BlinkLoadCache {
 
 	public static boolean isUpToDate() {
 		if (isUpToDate == null) {
-            isUpToDate = Files.exists(CACHED_DATA_FILE.toPath()) && HashUtil.compareHashes(currentHash);
+			isUpToDate = Files.exists(CACHED_DATA_FILE.toPath()) && HashUtil.compareHashes(currentHash);
 		}
 
-        return isUpToDate;
-    }
+		return isUpToDate;
+	}
 
 	public static @NotNull Map<AtlasTextureIdentifier, StitchResult> getCachedData() {
 		if (cachedData == null) {

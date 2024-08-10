@@ -30,7 +30,7 @@ public class ModUtilImpl {
 	}
 
 	public static @NotNull List<String> getModListNames() {
-        @NotNull List<String> modListNames = new ArrayList<>();
+		@NotNull List<String> modListNames = new ArrayList<>();
 		for (@NotNull var mod : FMLLoader.getLoadingModList().getMods()) {
 			modListNames.add(mod.toString());
 		}

@@ -1,6 +1,5 @@
 package io.github.steveplays28.blinkload.mixin.client;
 
-import io.github.steveplays28.blinkload.BlinkLoad;
 import io.github.steveplays28.blinkload.client.cache.BlinkLoadCache;
 import io.github.steveplays28.blinkload.mixin.client.accessor.SpriteContentsAccessor;
 import io.github.steveplays28.blinkload.util.resource.json.AtlasTextureIdentifier;
@@ -18,7 +17,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
