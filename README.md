@@ -19,8 +19,7 @@ Minecraft mod that caches assets to reduce game loading times.
 
 ### Results
 
-![Benchmark with Blinkload](docs/benchmarks/benchmark_with_blinkload.png)
-![Benchmark without BlinkLoad](docs/benchmarks/benchmark_without_blinkload.png)
+![Benchmark](docs/benchmarks/benchmark.png)
 
 Results may vary based on hardware (e.x. faster hardware may benefit less).
 
