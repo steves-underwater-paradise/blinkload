@@ -53,8 +53,7 @@ public class HashUtil {
 	public static void saveHash(@NotNull String hash) {
 		try {
 			// Ensure the parent directory exists
-			File parentDir = CACHED_HASH_FILE.getParentFile();
-			parentDir.mkdirs();
+			CACHED_HASH_FILE.getParentFile().mkdirs();
 
 			// Write the hash to the file
 			Files.write(CACHED_HASH_FILE.toPath(), hash.getBytes());

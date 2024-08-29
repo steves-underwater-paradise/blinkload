@@ -29,11 +29,11 @@ public class BlinkLoadCache {
 	private static final Logger LOGGER = LoggerFactory.getLogger(String.format("%s/cache", MOD_ID));
 	private static final @NotNull File CACHED_DATA_FILE = new File(
 			String.format("%s/atlas_textures_cache.json", CacheUtil.getCachePath()));
+	private static final @NotNull String MOD_LIST_HASH = HashUtil.calculateHash(HashUtil.getModList());
 
 	private static @Nullable CompletableFuture<Map<AtlasTextureIdentifier, StitchResult>> cachedDataCompletableFuture = null;
 	private static @Nullable Map<AtlasTextureIdentifier, StitchResult> cachedData = null;
 	private static @Nullable Boolean isUpToDate = null;
-	private static String currentHash = HashUtil.calculateHash(HashUtil.getModList());
 
 	public static void initialize() {
 		ClientLifecycleEvent.CLIENT_MAIN_STARTING.register(BlinkLoadCache::loadCachedDataAsync);
@@ -42,7 +42,7 @@ public class BlinkLoadCache {
 
 	public static boolean isUpToDate() {
 		if (isUpToDate == null) {
-			isUpToDate = Files.exists(CACHED_DATA_FILE.toPath()) && HashUtil.compareHashes(currentHash);
+			isUpToDate = Files.exists(CACHED_DATA_FILE.toPath()) && HashUtil.compareHashes(MOD_LIST_HASH);
 		}
 
 		return isUpToDate;
@@ -110,6 +110,7 @@ public class BlinkLoadCache {
 		return cachedData;
 	}
 
+	@SuppressWarnings("ResultOfMethodCallIgnored")
 	private static void writeCacheDataToFile() {
 		if (isUpToDate()) {
 			return;
@@ -117,10 +118,8 @@ public class BlinkLoadCache {
 
 		try {
 			LOGGER.info("Atlas creation finished, writing cache data to file ({}).", CACHED_DATA_FILE);
-
-			// TODO: Add error handling
 			CACHED_DATA_FILE.getParentFile().mkdirs();
-			HashUtil.saveHash(currentHash);
+			HashUtil.saveHash(MOD_LIST_HASH);
 
 			@NotNull var file = new FileWriter(CACHED_DATA_FILE);
 			file.write(JsonUtil.getGson().toJson(getCachedData().values()));
