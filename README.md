@@ -4,6 +4,26 @@
 
 Minecraft mod that caches assets to reduce game loading times.
 
+## Benchmark
+
+### Specifications
+
+- CPU: Intel i7-9750H @ 3.1GHz
+- 16GB RAM @ 2667MHz
+
+### Mods
+
+- [Fabric API](https://modrinth.com/mod/fabric-api)
+- [Architectury API](https://modrinth.com/mod/architectury-api)
+- [Mod Menu](https://modrinth.com/mod/modmenu)
+
+### Results
+
+![Benchmark with Blinkload](docs/benchmarks/benchmark_with_blinkload.png)
+![Benchmark without BlinkLoad](docs/benchmarks/benchmark_without_blinkload.png)
+
+Results may vary based on hardware (e.x. faster hardware may benefit less).
+
 ## Dependencies
 
 ### Required
