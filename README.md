@@ -8,7 +8,8 @@ Minecraft mod that caches assets to reduce game loading times.
 
 ### Required
 
-TODO
+- [Fabric API](https://modrinth.com/mod/fabric-api)
+- [Architectury API](https://modrinth.com/mod/architectury-api)
 
 ## Compatibility info
 
@@ -48,6 +49,17 @@ Client-side and server-side.
 
 - Q: Does only the client need this mod or does the server need it too?  
   A: Only the client needs this mod.
+
+## Contributing
+
+If you've encountered a problem or you want to suggest
+features, [create an issue](https://github.com/steves-underwater-paradise/blinkload/issues/new) on the issue tracker.
+
+### Development
+
+- `git clone https://github.com/steves-underwater-paradise/blinkload.git`
+- `cd blinkload`
+- `./gradlew build`
 
 ## License
 
