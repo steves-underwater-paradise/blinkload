@@ -37,9 +37,7 @@ public class NativeImageAdapter implements JsonSerializer<NativeImage>, JsonDese
 			byteBuffer.put(nativeImageBytes);
 			byteBuffer.rewind();
 
-			var nativeImage = NativeImage.read(byteBuffer);
-			MemoryUtil.memFree(byteBuffer);
-			return nativeImage;
+			return NativeImage.read(byteBuffer);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

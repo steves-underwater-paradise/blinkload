@@ -86,11 +86,11 @@ public class SpriteLoaderMixin {
 	 */
 	@Inject(method = "load(Lnet/minecraft/resource/ResourceManager;Lnet/minecraft/util/Identifier;ILjava/util/concurrent/Executor;)Ljava/util/concurrent/CompletableFuture;", at = @At(value = "RETURN"))
 	private void blinkload$saveAtlasTextures(@NotNull ResourceManager resourceManager, @NotNull Identifier atlasTextureId, int mipLevel, @NotNull Executor executor, @NotNull CallbackInfoReturnable<CompletableFuture<SpriteLoader.StitchResult>> cir) {
-		cir.getReturnValue().thenAccept(stitchResult -> {
-			if (BlinkLoadCache.isUpToDate()) {
-				return;
-			}
+		if (BlinkLoadCache.isUpToDate()) {
+			return;
+		}
 
+		cir.getReturnValue().thenAccept(stitchResult -> {
 			var stitchResultAtlasTextureRegions = stitchResult.regions();
 			@NotNull List<StitchResult.AtlasTextureRegion> atlasTextureRegions = new ArrayList<>();
 			for (@Nullable var stitchResultAtlasTextureRegion : stitchResultAtlasTextureRegions.entrySet()) {

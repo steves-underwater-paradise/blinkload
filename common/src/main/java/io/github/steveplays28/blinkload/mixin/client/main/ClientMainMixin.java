@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(Main.class)
 public class ClientMainMixin {
 	@Inject(method = "main", at = @At(value = "HEAD"))
-	private static void blinkload$loadCachedDataAsyncAndInitializeBootstrapOffThread(String[] args, CallbackInfo ci) {
+	private static void blinkload$loadCachedDataAsync(String[] args, CallbackInfo ci) {
 		BlinkLoadCache.initialize();
 		ClientLifecycleEvent.CLIENT_MAIN_STARTING.invoker().onClientMainStarting();
 	}
