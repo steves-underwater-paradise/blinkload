@@ -37,6 +37,7 @@ public class BlinkLoadCache {
 
 	public static void initialize() {
 		ClientLifecycleEvent.CLIENT_MAIN_STARTING.register(BlinkLoadCache::loadCachedDataAsync);
+		ClientLifecycleEvent.CLIENT_RESOURCE_RELOAD_STARTING.register(BlinkLoadCache::invalidateCache);
 		ClientLifecycleEvent.CLIENT_RESOURCE_RELOAD_FINISHED.register(BlinkLoadCache::writeCacheDataToFile);
 	}
 
@@ -46,6 +47,10 @@ public class BlinkLoadCache {
 		}
 
 		return isUpToDate;
+	}
+
+	public static void invalidateCache() {
+		isUpToDate = false;
 	}
 
 	public static @NotNull Map<AtlasTextureIdentifier, StitchResult> getCachedData() {
