@@ -7,7 +7,7 @@
     "server.ServerMainMixin"
   ],
   "client": [
-    "client.MinecraftClientMixin",
+    "client.ReloadableResourceManagerImplMixin",
     "client.SpriteLoaderMixin",
     "client.accessor.SpriteContentsAccessor",
     "client.blaze3d.platform.GLXMixin",

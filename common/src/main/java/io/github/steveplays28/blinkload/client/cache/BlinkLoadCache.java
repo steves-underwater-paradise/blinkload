@@ -33,10 +33,12 @@ public class BlinkLoadCache {
 
 	private static @Nullable CompletableFuture<Map<AtlasTextureIdentifier, StitchResult>> cachedDataCompletableFuture = null;
 	private static @Nullable Map<AtlasTextureIdentifier, StitchResult> cachedData = null;
+	private static boolean hasClientStarted = false;
 	private static @Nullable Boolean isUpToDate = null;
 
 	public static void initialize() {
 		ClientLifecycleEvent.CLIENT_MAIN_STARTING.register(BlinkLoadCache::loadCachedDataAsync);
+		dev.architectury.event.events.client.ClientLifecycleEvent.CLIENT_STARTED.register(instance -> hasClientStarted = true);
 		ClientLifecycleEvent.CLIENT_RESOURCE_RELOAD_STARTING.register(BlinkLoadCache::invalidateCache);
 		ClientLifecycleEvent.CLIENT_RESOURCE_RELOAD_FINISHED.register(BlinkLoadCache::writeCacheDataToFile);
 	}
@@ -50,6 +52,10 @@ public class BlinkLoadCache {
 	}
 
 	public static void invalidateCache() {
+		if (!hasClientStarted) {
+			return;
+		}
+
 		isUpToDate = false;
 	}
 
@@ -93,7 +99,6 @@ public class BlinkLoadCache {
 		}
 
 		var startTime = System.nanoTime();
-
 		@NotNull Map<AtlasTextureIdentifier, StitchResult> cachedData = new ConcurrentHashMap<>();
 		// Read JSON from the cached data file
 		try (@NotNull Reader reader = new FileReader(CACHED_DATA_FILE)) {
