@@ -41,7 +41,7 @@ public class BlinkLoadCache {
 		ClientLifecycleEvent.CLIENT_MAIN_STARTING.register(BlinkLoadCache::loadCachedDataAsync);
 		dev.architectury.event.events.client.ClientLifecycleEvent.CLIENT_STARTED.register(instance -> hasClientStarted = true);
 		ClientLifecycleEvent.CLIENT_RESOURCE_RELOAD_STARTING.register(BlinkLoadCache::invalidateCache);
-		ClientLifecycleEvent.CLIENT_RESOURCE_RELOAD_FINISHED.register(BlinkLoadCache::writeCacheDataToFile);
+		ClientLifecycleEvent.CLIENT_RESOURCE_RELOAD_FINISHED.register(BlinkLoadCache::writeCacheDataToFileAsync);
 	}
 
 	public static boolean isUpToDate() {
@@ -75,7 +75,7 @@ public class BlinkLoadCache {
 	private static @NotNull CompletableFuture<Map<AtlasTextureIdentifier, StitchResult>> loadCachedDataAsync() {
 		if (cachedDataCompletableFuture == null) {
 			cachedDataCompletableFuture = CompletableFuture.supplyAsync(
-					BlinkLoadCache::loadCachedData, ThreadUtil.getAtlasTextureLoaderThreadPoolExecutor()
+					BlinkLoadCache::loadCachedData, ThreadUtil.getAtlasTextureIOThreadPoolExecutor()
 			).whenCompleteAsync(
 					(cachedData, throwable) -> {
 						if (throwable != null) {
@@ -119,6 +119,10 @@ public class BlinkLoadCache {
 		}
 
 		return cachedData;
+	}
+
+	private static void writeCacheDataToFileAsync() {
+		CompletableFuture.runAsync(BlinkLoadCache::writeCacheDataToFile, ThreadUtil.getAtlasTextureIOThreadPoolExecutor());
 	}
 
 	@SuppressWarnings("ResultOfMethodCallIgnored")
