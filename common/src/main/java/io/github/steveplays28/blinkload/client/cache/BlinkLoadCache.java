@@ -9,6 +9,7 @@ import io.github.steveplays28.blinkload.util.resource.json.JsonUtil;
 import io.github.steveplays28.blinkload.util.resource.json.StitchResult;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -129,7 +130,7 @@ public class BlinkLoadCache {
 		try {
 			LOGGER.info("Atlas creation finished, writing cache data to file ({}).", CACHED_DATA_FILE);
 			@NotNull var cacheDirectory = CACHED_DATA_FILE.getParentFile();
-			cacheDirectory.delete();
+			FileUtils.deleteDirectory(cacheDirectory);
 			cacheDirectory.mkdirs();
 			HashUtil.saveHash(MOD_LIST_HASH);
 
