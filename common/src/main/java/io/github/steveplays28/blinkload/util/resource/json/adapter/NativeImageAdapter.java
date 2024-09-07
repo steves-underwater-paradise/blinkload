@@ -29,9 +29,12 @@ public class NativeImageAdapter implements JsonSerializer<NativeImage>, JsonDese
 	 * @throws JsonParseException if json is not in the expected format of {@code typeofT}
 	 */
 	@Override
-	public @NotNull NativeImage deserialize(@NotNull JsonElement json, Type typeOfT, @NotNull JsonDeserializationContext context) throws JsonParseException {
-		byte[] nativeImageBytes = context.deserialize(json, byte[].class);
+	public @Nullable NativeImage deserialize(@NotNull JsonElement json, Type typeOfT, @NotNull JsonDeserializationContext context) throws JsonParseException {
+		if (json.isJsonNull()) {
+			return null;
+		}
 
+		byte[] nativeImageBytes = context.deserialize(json, byte[].class);
 		try {
 			var byteBuffer = MemoryUtil.memAlloc(nativeImageBytes.length);
 			byteBuffer.put(nativeImageBytes);
@@ -41,7 +44,7 @@ public class NativeImageAdapter implements JsonSerializer<NativeImage>, JsonDese
 			MemoryUtil.memFree(byteBuffer);
 			return nativeImage;
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			return null;
 		}
 	}
 
@@ -70,7 +73,7 @@ public class NativeImageAdapter implements JsonSerializer<NativeImage>, JsonDese
 		try {
 			nativeImageBytes = src.getBytes();
 		} catch (IOException e) {
-			throw new RuntimeException(e);
+			return JsonNull.INSTANCE;
 		}
 
 		return context.serialize(nativeImageBytes, byte[].class);
