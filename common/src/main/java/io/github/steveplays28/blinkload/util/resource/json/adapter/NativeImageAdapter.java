@@ -1,19 +1,15 @@
 package io.github.steveplays28.blinkload.util.resource.json.adapter;
 
 import com.google.gson.*;
-import io.github.steveplays28.blinkload.util.CacheUtil;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.texture.NativeImage;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.lwjgl.system.MemoryUtil;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.Type;
-import java.util.UUID;
 
 @Environment(EnvType.CLIENT)
 public class NativeImageAdapter implements JsonSerializer<NativeImage>, JsonDeserializer<NativeImage> {
@@ -34,8 +30,16 @@ public class NativeImageAdapter implements JsonSerializer<NativeImage>, JsonDese
 	 */
 	@Override
 	public @NotNull NativeImage deserialize(@NotNull JsonElement json, Type typeOfT, @NotNull JsonDeserializationContext context) throws JsonParseException {
-		try (InputStream inputStream = new FileInputStream(context.<String>deserialize(json, String.class))) {
-			return NativeImage.read(inputStream);
+		byte[] nativeImageBytes = context.deserialize(json, byte[].class);
+
+		try {
+			var byteBuffer = MemoryUtil.memAlloc(nativeImageBytes.length);
+			byteBuffer.put(nativeImageBytes);
+			byteBuffer.rewind();
+
+			var nativeImage = NativeImage.read(byteBuffer);
+			MemoryUtil.memFree(byteBuffer);
+			return nativeImage;
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -62,14 +66,13 @@ public class NativeImageAdapter implements JsonSerializer<NativeImage>, JsonDese
 			return JsonNull.INSTANCE;
 		}
 
-		@NotNull File filePath;
+		byte[] nativeImageBytes;
 		try {
-			filePath = CacheUtil.getCachePath().resolve(UUID.nameUUIDFromBytes(src.getBytes()).toString().concat(".png")).toFile();
-			src.writeTo(filePath);
+			nativeImageBytes = src.getBytes();
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 
-		return context.serialize(filePath.toString());
+		return context.serialize(nativeImageBytes, byte[].class);
 	}
 }

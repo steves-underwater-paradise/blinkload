@@ -131,18 +131,27 @@ public class BlinkLoadCache {
 			return;
 		}
 
+		var startTime = System.nanoTime();
 		try {
-			LOGGER.info("Atlas creation finished, writing cache data to file ({}).", CACHED_DATA_FILE);
 			@NotNull var cacheDirectory = CACHED_DATA_FILE.getParentFile();
 			FileUtils.deleteDirectory(cacheDirectory);
 			cacheDirectory.mkdirs();
 			HashUtil.saveHash(MOD_LIST_HASH);
-
-			@NotNull var file = new FileWriter(CACHED_DATA_FILE);
-			file.write(JsonUtil.getGson().toJson(getCachedData().values()));
-			file.close();
 		} catch (IOException e) {
-			LOGGER.error("Exception thrown while writing cache data to file ({}): {}", e, CACHED_DATA_FILE);
+			LOGGER.error("Exception thrown while re-creating directories and/or saving hash data: ", e);
 		}
+
+		try (@NotNull var fileWriter = new FileWriter(CACHED_DATA_FILE)) {
+			fileWriter.write(JsonUtil.getGson().toJson(getCachedData().values()));
+		} catch (IOException e) {
+			LOGGER.error("Exception thrown while writing cache data to file ({}): {}", CACHED_DATA_FILE, e);
+		}
+
+		isUpToDate = true;
+		LOGGER.info(
+				"Saved atlas textures to cache ({}; took {}ms).",
+				CACHED_DATA_FILE,
+				TimeUnit.MILLISECONDS.convert(System.nanoTime() - startTime, TimeUnit.NANOSECONDS)
+		);
 	}
 }
