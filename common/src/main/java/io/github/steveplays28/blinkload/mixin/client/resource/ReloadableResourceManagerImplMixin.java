@@ -1,4 +1,4 @@
-package io.github.steveplays28.blinkload.mixin.client;
+package io.github.steveplays28.blinkload.mixin.client.resource;
 
 import io.github.steveplays28.blinkload.client.event.ClientLifecycleEvent;
 import net.fabricmc.api.EnvType;

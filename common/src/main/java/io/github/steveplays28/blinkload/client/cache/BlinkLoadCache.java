@@ -128,7 +128,9 @@ public class BlinkLoadCache {
 
 		try {
 			LOGGER.info("Atlas creation finished, writing cache data to file ({}).", CACHED_DATA_FILE);
-			CACHED_DATA_FILE.getParentFile().mkdirs();
+			@NotNull var cacheDirectory = CACHED_DATA_FILE.getParentFile();
+			cacheDirectory.delete();
+			cacheDirectory.mkdirs();
 			HashUtil.saveHash(MOD_LIST_HASH);
 
 			@NotNull var file = new FileWriter(CACHED_DATA_FILE);

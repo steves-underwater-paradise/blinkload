@@ -1,4 +1,4 @@
-package io.github.steveplays28.blinkload.mixin.client;
+package io.github.steveplays28.blinkload.mixin.client.texture;
 
 import io.github.steveplays28.blinkload.client.cache.BlinkLoadCache;
 import io.github.steveplays28.blinkload.mixin.client.accessor.SpriteContentsAccessor;
@@ -58,20 +58,21 @@ public class SpriteLoaderMixin {
 				}
 
 				@Nullable var spriteId = sprite.getIdentifier();
-				@Nullable var spriteNativeImage = sprite.getNativeImage();
-				if (spriteId == null || spriteNativeImage == null) {
+				@Nullable var spriteMipmapLevel0Image = sprite.getMipmapLevel0Image();
+				@Nullable var spriteMipmapLevelsImages = sprite.getMipmapLevelsImages();
+				if (spriteId == null || spriteMipmapLevel0Image == null || spriteMipmapLevelsImages == null) {
 					continue;
 				}
 
-				atlasTextureRegions.put(
-						spriteId, new Sprite(
-								atlasTextureRegionId, new SpriteContents(spriteId,
-								new SpriteDimensions(atlasTextureRegion.getWidth(), atlasTextureRegion.getHeight()), spriteNativeImage,
-								AnimationResourceMetadata.EMPTY
-						), stitchResult.getWidth(), stitchResult.getHeight(), atlasTextureRegion.getX(),
-								atlasTextureRegion.getY()
-						)
+				@NotNull var spriteContents = new SpriteContents(spriteId,
+						new SpriteDimensions(atlasTextureRegion.getWidth(), atlasTextureRegion.getHeight()), spriteMipmapLevel0Image,
+						AnimationResourceMetadata.EMPTY
 				);
+				((SpriteContentsAccessor) spriteContents).setMipmapLevelsImages(spriteMipmapLevelsImages);
+				atlasTextureRegions.put(spriteId, new Sprite(
+						atlasTextureRegionId, spriteContents, stitchResult.getWidth(), stitchResult.getHeight(), atlasTextureRegion.getX(),
+						atlasTextureRegion.getY()
+				));
 			}
 
 			return new SpriteLoader.StitchResult(stitchResult.getWidth(), stitchResult.getHeight(), stitchResult.getMipLevel(),
@@ -86,7 +87,7 @@ public class SpriteLoaderMixin {
 	 */
 	@Inject(method = "load(Lnet/minecraft/resource/ResourceManager;Lnet/minecraft/util/Identifier;ILjava/util/concurrent/Executor;)Ljava/util/concurrent/CompletableFuture;", at = @At(value = "RETURN"))
 	private void blinkload$saveAtlasTextures(@NotNull ResourceManager resourceManager, @NotNull Identifier atlasTextureId, int mipLevel, @NotNull Executor executor, @NotNull CallbackInfoReturnable<CompletableFuture<SpriteLoader.StitchResult>> cir) {
-		cir.getReturnValue().thenAccept(stitchResult -> {
+		cir.getReturnValue().thenAccept(incompleteStitchResult -> incompleteStitchResult.whenComplete().thenAccept(stitchResult -> {
 			if (BlinkLoadCache.isUpToDate()) {
 				return;
 			}
@@ -102,21 +103,23 @@ public class SpriteLoaderMixin {
 				var atlasIdentifier = stitchResultAtlasTextureRegion.getValue().getAtlasId();
 				// Actual sprite identifier
 				var spriteIdentifier = stitchResultAtlasTextureRegion.getKey();
+				var spriteContents = ((SpriteContentsAccessor) stitchResultAtlasTextureRegion.getValue().getContents());
 				var x = stitchResultAtlasTextureRegion.getValue().getX();
 				var y = stitchResultAtlasTextureRegion.getValue().getY();
 				var width = stitchResultAtlasTextureRegion.getValue().getContents().getWidth();
 				var height = stitchResultAtlasTextureRegion.getValue().getContents().getHeight();
 				atlasTextureRegions.add(new StitchResult.AtlasTextureRegion(atlasIdentifier,
 						new StitchResult.AtlasTextureRegion.Sprite(
-								spriteIdentifier,
-								((SpriteContentsAccessor) stitchResultAtlasTextureRegion.getValue().getContents()).getImage()
+								spriteIdentifier, spriteContents.getImage(),
+								spriteContents.getMipmapLevelsImages()
 						), width, height, x, y
 				));
 			}
 
-			BlinkLoadCache.cacheData(new StitchResult(atlasTextureId, stitchResult.width(), stitchResult.height(), stitchResult.mipLevel(),
-					atlasTextureRegions.toArray(StitchResult.AtlasTextureRegion[]::new)
-			));
-		});
+			BlinkLoadCache.cacheData(
+					new StitchResult(atlasTextureId, stitchResult.width(), stitchResult.height(), stitchResult.mipLevel(),
+							atlasTextureRegions.toArray(StitchResult.AtlasTextureRegion[]::new)
+					));
+		}));
 	}
 }
