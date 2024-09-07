@@ -30,7 +30,7 @@ public class BlinkLoadCache {
 	private static final Logger LOGGER = LoggerFactory.getLogger(String.format("%s/cache", MOD_ID));
 	private static final @NotNull File CACHED_DATA_FILE = new File(
 			String.format("%s/atlas_textures_cache.json", CacheUtil.getCachePath()));
-	private static final @NotNull String MOD_LIST_HASH = HashUtil.calculateHash(HashUtil.getModAndResourcePackListCommaSeparated());
+	private static final @NotNull String MOD_LIST_HASH = HashUtil.calculateHash(HashUtil.getModAndEnabledResourcePackListCommaSeparated());
 
 	private static @Nullable CompletableFuture<Map<AtlasTextureIdentifier, StitchResult>> cachedDataCompletableFuture = null;
 	private static @Nullable Map<AtlasTextureIdentifier, StitchResult> cachedData = null;

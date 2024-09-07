@@ -16,11 +16,12 @@ import java.util.Arrays;
 import java.util.List;
 
 public class HashUtil {
-	private static final @NotNull File CACHED_HASH_FILE = new File(String.format("%s/mod_list_hash", CacheUtil.getCachePath()));
+	private static final @NotNull File CACHED_HASH_FILE = new File(
+			String.format("%s/mod_and_enabled_resource_pack_list_hash", CacheUtil.getCachePath()));
 	// TODO: Move into a config file
-	private static final @NotNull String[] filterArray = {"generated_"};
+	private static final @NotNull String[] nameFilterSubstrings = {"generated"};
 
-	public static @NotNull String getModAndResourcePackListCommaSeparated() {
+	public static @NotNull String getModAndEnabledResourcePackListCommaSeparated() {
 		@NotNull var modAndResourcePackNames = ModUtil.getModListNames();
 		modAndResourcePackNames.addAll(MinecraftClient.getInstance().getResourcePackManager().getEnabledNames());
 		// Alphabetically sort the mod/resource pack list
@@ -28,7 +29,7 @@ public class HashUtil {
 
 		@NotNull List<String> filteredNames = new ArrayList<>();
 		for (@NotNull String name : modAndResourcePackNames) {
-			if (Arrays.stream(filterArray).noneMatch(name::startsWith)) {
+			if (Arrays.stream(nameFilterSubstrings).noneMatch(name::contains)) {
 				continue;
 			}
 
@@ -36,7 +37,7 @@ public class HashUtil {
 			filteredNames.add(name);
 		}
 
-		BlinkLoad.LOGGER.info("Mods/resource packs containing a filtered prefix: {}", StringUtils.join(filteredNames, ", "));
+		BlinkLoad.LOGGER.info("Mods/resource packs containing a filtered substring: {}", StringUtils.join(filteredNames, ", "));
 		return StringUtils.join(modAndResourcePackNames, ", ");
 	}
 
