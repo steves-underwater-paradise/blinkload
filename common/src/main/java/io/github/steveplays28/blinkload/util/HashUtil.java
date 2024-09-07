@@ -2,6 +2,8 @@ package io.github.steveplays28.blinkload.util;
 
 import com.google.common.hash.Hashing;
 import io.github.steveplays28.blinkload.BlinkLoad;
+import net.minecraft.client.MinecraftClient;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -9,6 +11,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -17,25 +20,24 @@ public class HashUtil {
 	// TODO: Move into a config file
 	private static final @NotNull String[] filterArray = {"generated_"};
 
-	public static @NotNull String getModList() {
-		@NotNull List<String> modListNames = ModUtil.getModListNames();
-		// Alphabetically sort the mod list
-		modListNames.sort(String::compareToIgnoreCase);
+	public static @NotNull String getModAndResourcePackListCommaSeparated() {
+		@NotNull var modAndResourcePackNames = ModUtil.getModListNames();
+		modAndResourcePackNames.addAll(MinecraftClient.getInstance().getResourcePackManager().getEnabledNames());
+		// Alphabetically sort the mod/resource pack list
+		modAndResourcePackNames.sort(String::compareToIgnoreCase);
 
-		@NotNull StringBuilder modNames = new StringBuilder();
-		for (@NotNull String modName : modListNames) {
-			if (Arrays.stream(filterArray).anyMatch(modName::startsWith)) {
-				BlinkLoad.LOGGER.info("Mod: {} Contains a filtered prefix.", modName);
+		@NotNull List<String> filteredNames = new ArrayList<>();
+		for (@NotNull String name : modAndResourcePackNames) {
+			if (Arrays.stream(filterArray).noneMatch(name::startsWith)) {
 				continue;
 			}
 
-			if (!modNames.isEmpty()) {
-				modNames.append(", ");
-			}
-			modNames.append(modName);
+			modAndResourcePackNames.remove(name);
+			filteredNames.add(name);
 		}
 
-		return modNames.toString();
+		BlinkLoad.LOGGER.info("Mods/resource packs containing a filtered prefix: {}", StringUtils.join(filteredNames, ", "));
+		return StringUtils.join(modAndResourcePackNames, ", ");
 	}
 
 	/**
