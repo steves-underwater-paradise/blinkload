@@ -5,6 +5,7 @@
   "name": "${mod_name}",
   "description": "${mod_description}",
   "authors": [
+    "BartolJukica",
     "Steveplays28"
   ],
   "contact": {
