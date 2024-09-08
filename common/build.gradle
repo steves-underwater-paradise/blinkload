@@ -27,6 +27,9 @@ dependencies {
     modApi("dev.architectury:architectury:${rootProject.architectury_api_version}") {
         exclude group: 'net.fabricmc', module: 'fabric-loader'
     }
+
+    // Mod Menu
+    modCompileOnly "maven.modrinth:modmenu:${rootProject.mod_menu_version}"
 }
 
 publishing {
