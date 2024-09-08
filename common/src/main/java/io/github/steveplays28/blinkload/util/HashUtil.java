@@ -32,9 +32,9 @@ public class HashUtil {
 				continue;
 			}
 
-			modAndResourcePackNames.remove(name);
 			filteredNames.add(name);
 		}
+		modAndResourcePackNames.removeAll(filteredNames);
 
 		BlinkLoad.LOGGER.info("Mods/resource packs containing a filtered substring: {}", StringUtils.join(filteredNames, ", "));
 		return StringUtils.join(modAndResourcePackNames, ", ");
