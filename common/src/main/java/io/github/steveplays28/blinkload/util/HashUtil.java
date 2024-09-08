@@ -2,7 +2,6 @@ package io.github.steveplays28.blinkload.util;
 
 import com.google.common.hash.Hashing;
 import io.github.steveplays28.blinkload.BlinkLoad;
-import net.minecraft.client.MinecraftClient;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -23,7 +22,7 @@ public class HashUtil {
 
 	public static @NotNull String getModAndEnabledResourcePackListCommaSeparated() {
 		@NotNull var modAndResourcePackNames = ModUtil.getModListNames();
-		modAndResourcePackNames.addAll(MinecraftClient.getInstance().getResourcePackManager().getEnabledNames());
+		modAndResourcePackNames.addAll(ModUtil.getEnabledResourcePackNames());
 		// Alphabetically sort the mod/resource pack list
 		modAndResourcePackNames.sort(String::compareToIgnoreCase);
 
