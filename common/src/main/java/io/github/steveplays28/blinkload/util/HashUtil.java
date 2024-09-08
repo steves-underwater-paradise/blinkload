@@ -2,6 +2,7 @@ package io.github.steveplays28.blinkload.util;
 
 import com.google.common.hash.Hashing;
 import io.github.steveplays28.blinkload.BlinkLoad;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -9,33 +10,34 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public class HashUtil {
-	private static final @NotNull File CACHED_HASH_FILE = new File(String.format("%s/mod_list_hash", CacheUtil.getCachePath()));
+	private static final @NotNull File CACHED_HASH_FILE = new File(
+			String.format("%s/mod_and_enabled_resource_pack_list_hash", CacheUtil.getCachePath()));
 	// TODO: Move into a config file
-	private static final @NotNull String[] filterArray = {"generated_"};
+	private static final @NotNull String[] nameFilterSubstrings = {"generated"};
 
-	public static @NotNull String getModList() {
-		@NotNull List<String> modListNames = ModUtil.getModListNames();
-		// Alphabetically sort the mod list
-		modListNames.sort(String::compareToIgnoreCase);
+	public static @NotNull String getModAndEnabledResourcePackListCommaSeparated() {
+		@NotNull var modAndResourcePackNames = ModUtil.getModListNames();
+		modAndResourcePackNames.addAll(ModUtil.getEnabledResourcePackNames());
+		// Alphabetically sort the mod/resource pack list
+		modAndResourcePackNames.sort(String::compareToIgnoreCase);
 
-		@NotNull StringBuilder modNames = new StringBuilder();
-		for (@NotNull String modName : modListNames) {
-			if (Arrays.stream(filterArray).anyMatch(modName::startsWith)) {
-				BlinkLoad.LOGGER.info("Mod: {} Contains a filtered prefix.", modName);
+		@NotNull List<String> filteredNames = new ArrayList<>();
+		for (@NotNull String name : modAndResourcePackNames) {
+			if (Arrays.stream(nameFilterSubstrings).noneMatch(name::contains)) {
 				continue;
 			}
 
-			if (!modNames.isEmpty()) {
-				modNames.append(", ");
-			}
-			modNames.append(modName);
+			filteredNames.add(name);
 		}
+		modAndResourcePackNames.removeAll(filteredNames);
 
-		return modNames.toString();
+		BlinkLoad.LOGGER.info("Mods/resource packs containing a filtered substring: {}", StringUtils.join(filteredNames, ", "));
+		return StringUtils.join(modAndResourcePackNames, ", ");
 	}
 
 	/**

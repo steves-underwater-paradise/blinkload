@@ -9,6 +9,7 @@ import io.github.steveplays28.blinkload.util.resource.json.JsonUtil;
 import io.github.steveplays28.blinkload.util.resource.json.StitchResult;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -29,15 +30,18 @@ public class BlinkLoadCache {
 	private static final Logger LOGGER = LoggerFactory.getLogger(String.format("%s/cache", MOD_ID));
 	private static final @NotNull File CACHED_DATA_FILE = new File(
 			String.format("%s/atlas_textures_cache.json", CacheUtil.getCachePath()));
-	private static final @NotNull String MOD_LIST_HASH = HashUtil.calculateHash(HashUtil.getModList());
+	private static final @NotNull String MOD_LIST_HASH = HashUtil.calculateHash(HashUtil.getModAndEnabledResourcePackListCommaSeparated());
 
 	private static @Nullable CompletableFuture<Map<AtlasTextureIdentifier, StitchResult>> cachedDataCompletableFuture = null;
 	private static @Nullable Map<AtlasTextureIdentifier, StitchResult> cachedData = null;
+	private static boolean hasClientStarted = false;
 	private static @Nullable Boolean isUpToDate = null;
 
 	public static void initialize() {
 		ClientLifecycleEvent.CLIENT_MAIN_STARTING.register(BlinkLoadCache::loadCachedDataAsync);
-		ClientLifecycleEvent.CLIENT_RESOURCE_RELOAD_FINISHED.register(BlinkLoadCache::writeCacheDataToFile);
+		dev.architectury.event.events.client.ClientLifecycleEvent.CLIENT_STARTED.register(instance -> hasClientStarted = true);
+		ClientLifecycleEvent.CLIENT_RESOURCE_RELOAD_STARTING.register(BlinkLoadCache::invalidateCache);
+		ClientLifecycleEvent.CLIENT_RESOURCE_RELOAD_FINISHED.register(BlinkLoadCache::writeCacheDataToFileAsync);
 	}
 
 	public static boolean isUpToDate() {
@@ -46,6 +50,14 @@ public class BlinkLoadCache {
 		}
 
 		return isUpToDate;
+	}
+
+	public static void invalidateCache() {
+		if (!hasClientStarted) {
+			return;
+		}
+
+		isUpToDate = false;
 	}
 
 	public static @NotNull Map<AtlasTextureIdentifier, StitchResult> getCachedData() {
@@ -63,7 +75,7 @@ public class BlinkLoadCache {
 	private static @NotNull CompletableFuture<Map<AtlasTextureIdentifier, StitchResult>> loadCachedDataAsync() {
 		if (cachedDataCompletableFuture == null) {
 			cachedDataCompletableFuture = CompletableFuture.supplyAsync(
-					BlinkLoadCache::loadCachedData, ThreadUtil.getAtlasTextureLoaderThreadPoolExecutor()
+					BlinkLoadCache::loadCachedData, ThreadUtil.getAtlasTextureIOThreadPoolExecutor()
 			).whenCompleteAsync(
 					(cachedData, throwable) -> {
 						if (throwable != null) {
@@ -88,7 +100,6 @@ public class BlinkLoadCache {
 		}
 
 		var startTime = System.nanoTime();
-
 		@NotNull Map<AtlasTextureIdentifier, StitchResult> cachedData = new ConcurrentHashMap<>();
 		// Read JSON from the cached data file
 		try (@NotNull Reader reader = new FileReader(CACHED_DATA_FILE)) {
@@ -110,22 +121,37 @@ public class BlinkLoadCache {
 		return cachedData;
 	}
 
+	private static void writeCacheDataToFileAsync() {
+		CompletableFuture.runAsync(BlinkLoadCache::writeCacheDataToFile, ThreadUtil.getAtlasTextureIOThreadPoolExecutor());
+	}
+
 	@SuppressWarnings("ResultOfMethodCallIgnored")
 	private static void writeCacheDataToFile() {
 		if (isUpToDate()) {
 			return;
 		}
 
+		var startTime = System.nanoTime();
 		try {
-			LOGGER.info("Atlas creation finished, writing cache data to file ({}).", CACHED_DATA_FILE);
-			CACHED_DATA_FILE.getParentFile().mkdirs();
+			@NotNull var cacheDirectory = CACHED_DATA_FILE.getParentFile();
+			FileUtils.deleteDirectory(cacheDirectory);
+			cacheDirectory.mkdirs();
 			HashUtil.saveHash(MOD_LIST_HASH);
-
-			@NotNull var file = new FileWriter(CACHED_DATA_FILE);
-			file.write(JsonUtil.getGson().toJson(getCachedData().values()));
-			file.close();
 		} catch (IOException e) {
-			LOGGER.error("Exception thrown while writing cache data to file ({}): {}", e, CACHED_DATA_FILE);
+			LOGGER.error("Exception thrown while re-creating directories and/or saving hash data: ", e);
 		}
+
+		try (@NotNull var fileWriter = new FileWriter(CACHED_DATA_FILE)) {
+			fileWriter.write(JsonUtil.getGson().toJson(getCachedData().values()));
+		} catch (IOException e) {
+			LOGGER.error("Exception thrown while writing cache data to file ({}): {}", CACHED_DATA_FILE, e);
+		}
+
+		isUpToDate = true;
+		LOGGER.info(
+				"Saved atlas textures to cache ({}; took {}ms).",
+				CACHED_DATA_FILE,
+				TimeUnit.MILLISECONDS.convert(System.nanoTime() - startTime, TimeUnit.NANOSECONDS)
+		);
 	}
 }

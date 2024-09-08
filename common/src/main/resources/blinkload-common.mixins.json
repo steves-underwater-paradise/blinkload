@@ -7,11 +7,12 @@
     "server.ServerMainMixin"
   ],
   "client": [
-    "client.MinecraftClientMixin",
-    "client.SpriteLoaderMixin",
+    "client.resource.ReloadableResourceManagerImplMixin",
+    "client.texture.SpriteLoaderMixin",
     "client.accessor.SpriteContentsAccessor",
     "client.blaze3d.platform.GLXMixin",
-    "client.main.ClientMainMixin"
+    "client.main.ClientMainMixin",
+    "client.texture.NativeImageMixin"
   ],
   "injectors": {
     "defaultRequire": 1

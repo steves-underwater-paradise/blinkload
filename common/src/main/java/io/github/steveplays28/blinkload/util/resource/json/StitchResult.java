@@ -89,19 +89,25 @@ public class StitchResult implements Comparable<StitchResult> {
 
 		public static class Sprite {
 			private @Nullable Identifier identifier;
-			private @Nullable NativeImage nativeImage;
+			private @Nullable NativeImage mipmapLevel0Image;
+			private @Nullable NativeImage[] mipmapLevelsImages;
 
-			public Sprite(@Nullable Identifier identifier, @Nullable NativeImage nativeImage) {
+			public Sprite(@Nullable Identifier identifier, @Nullable NativeImage mipmapLevel0Image, @Nullable NativeImage[] mipmapLevelsImages) {
 				this.identifier = identifier;
-				this.nativeImage = nativeImage;
+				this.mipmapLevel0Image = mipmapLevel0Image;
+				this.mipmapLevelsImages = mipmapLevelsImages;
 			}
 
 			public @Nullable Identifier getIdentifier() {
 				return identifier;
 			}
 
-			public @Nullable NativeImage getNativeImage() {
-				return nativeImage;
+			public @Nullable NativeImage getMipmapLevel0Image() {
+				return mipmapLevel0Image;
+			}
+
+			public @Nullable NativeImage[] getMipmapLevelsImages() {
+				return mipmapLevelsImages;
 			}
 		}
 	}

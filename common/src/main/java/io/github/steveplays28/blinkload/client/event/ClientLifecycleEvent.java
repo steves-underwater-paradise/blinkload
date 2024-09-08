@@ -12,6 +12,10 @@ public interface ClientLifecycleEvent {
 	 */
 	Event<ClientMainStarting> CLIENT_MAIN_STARTING = EventFactory.createLoop();
 	/**
+	 * @see ClientResourceReloadStarting
+	 */
+	Event<ClientResourceReloadStarting> CLIENT_RESOURCE_RELOAD_STARTING = EventFactory.createLoop();
+	/**
 	 * @see ClientResourceReloadFinished
 	 */
 	Event<ClientResourceReloadFinished> CLIENT_RESOURCE_RELOAD_FINISHED = EventFactory.createLoop();
@@ -30,5 +34,13 @@ public interface ClientLifecycleEvent {
 		 * Invoked when the client has finished resource reloading.
 		 */
 		void onClientResourceReloadFinished();
+	}
+
+	@FunctionalInterface
+	interface ClientResourceReloadStarting {
+		/**
+		 * Invoked when the client is starting resource reloading.
+		 */
+		void onClientResourceReloadStarting();
 	}
 }
