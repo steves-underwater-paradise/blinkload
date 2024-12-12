@@ -105,6 +105,9 @@ public class BlinkLoadCache {
 		try (@NotNull Reader reader = new FileReader(CACHED_DATA_FILE)) {
 			// Convert the JSON data to a Java object
 			@NotNull var stitchResults = JsonUtil.getGson().fromJson(reader, StitchResult[].class);
+			if (stitchResults == null) {
+				return new ConcurrentHashMap<>();
+			}
 			for (int stitchResultIndex = 0; stitchResultIndex < stitchResults.length; stitchResultIndex++) {
 				@NotNull var stitchResult = stitchResults[stitchResultIndex];
 				cachedData.put(new AtlasTextureIdentifier(stitchResult.getAtlasTextureId(), stitchResult.getMipLevel()), stitchResult);
