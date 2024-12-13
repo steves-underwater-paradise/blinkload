@@ -1,8 +1,7 @@
 ### Changed
 
-- The hash to use the list of enabled resource packs on top of the mod list
+- The mod description supports localization
 
 ### Fixed
 
-- Mipmap levels not being saved to the cache, causing broken mipmaps when loading atlas textures from the cache
-- An occasional native crash when saving atlas textures to the cache
+- Occasionally causes a NullPointerException that causes the game to crash
