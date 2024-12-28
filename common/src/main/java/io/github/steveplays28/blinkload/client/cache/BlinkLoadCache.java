@@ -15,7 +15,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonSyntaxException;
 import java.io.*;
 import java.nio.file.Files;
 import java.util.Map;
@@ -28,8 +30,7 @@ import static io.github.steveplays28.blinkload.BlinkLoad.MOD_ID;
 @Environment(EnvType.CLIENT)
 public class BlinkLoadCache {
 	private static final Logger LOGGER = LoggerFactory.getLogger(String.format("%s/cache", MOD_ID));
-	private static final @NotNull File CACHED_DATA_FILE = new File(
-			String.format("%s/atlas_textures_cache.json", CacheUtil.getCachePath()));
+	private static final @NotNull File CACHED_DATA_FILE = new File(String.format("%s/atlas_textures_cache.json", CacheUtil.getCachePath()));
 	private static final @NotNull String MOD_LIST_HASH = HashUtil.calculateHash(HashUtil.getModAndEnabledResourcePackListCommaSeparated());
 
 	private static @Nullable CompletableFuture<Map<AtlasTextureIdentifier, StitchResult>> cachedDataCompletableFuture = null;
@@ -74,20 +75,13 @@ public class BlinkLoadCache {
 
 	private static @NotNull CompletableFuture<Map<AtlasTextureIdentifier, StitchResult>> loadCachedDataAsync() {
 		if (cachedDataCompletableFuture == null) {
-			cachedDataCompletableFuture = CompletableFuture.supplyAsync(
-					BlinkLoadCache::loadCachedData, ThreadUtil.getAtlasTextureIOThreadPoolExecutor()
-			).whenCompleteAsync(
-					(cachedData, throwable) -> {
-						if (throwable != null) {
-							LOGGER.error(
-									"Exception thrown while trying to load the atlas texture cache: ",
-									ExceptionUtils.getRootCause(throwable)
-							);
-						}
+			cachedDataCompletableFuture = CompletableFuture.supplyAsync(BlinkLoadCache::loadCachedData, ThreadUtil.getAtlasTextureIOThreadPoolExecutor()).whenCompleteAsync((cachedData, throwable) -> {
+				if (throwable != null) {
+					LOGGER.error("Exception thrown while trying to load the atlas texture cache: ", ExceptionUtils.getRootCause(throwable));
+				}
 
-						BlinkLoadCache.cachedData = cachedData;
-					}
-			);
+				BlinkLoadCache.cachedData = cachedData;
+			});
 		}
 
 		return cachedDataCompletableFuture;
@@ -100,25 +94,23 @@ public class BlinkLoadCache {
 		}
 
 		var startTime = System.nanoTime();
-		@NotNull Map<AtlasTextureIdentifier, StitchResult> cachedData = new ConcurrentHashMap<>();
 		// Read JSON from the cached data file
 		try (@NotNull Reader reader = new FileReader(CACHED_DATA_FILE)) {
 			// Convert the JSON data to a Java object
-			@NotNull var stitchResults = JsonUtil.getGson().fromJson(reader, StitchResult[].class);
+			@Nullable var stitchResults = JsonUtil.getGson().fromJson(reader, StitchResult[].class);
 			if (stitchResults == null) {
 				return new ConcurrentHashMap<>();
 			}
+
+			@NotNull Map<AtlasTextureIdentifier, StitchResult> cachedData = new ConcurrentHashMap<>();
 			for (int stitchResultIndex = 0; stitchResultIndex < stitchResults.length; stitchResultIndex++) {
 				@NotNull var stitchResult = stitchResults[stitchResultIndex];
 				cachedData.put(new AtlasTextureIdentifier(stitchResult.getAtlasTextureId(), stitchResult.getMipLevel()), stitchResult);
 			}
 
-			LOGGER.info(
-					"Loaded atlas textures from cache (took {}ms).",
-					TimeUnit.MILLISECONDS.convert(System.nanoTime() - startTime, TimeUnit.NANOSECONDS)
-			);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
+			LOGGER.info("Loaded atlas textures from cache (took {}ms).", TimeUnit.MILLISECONDS.convert(System.nanoTime() - startTime, TimeUnit.NANOSECONDS));
+		} catch (IOException | JsonSyntaxException e) {
+			LOGGER.error("Failed loading cached data, re-creating cache: ", e);
 		}
 
 		return cachedData;
@@ -151,10 +143,6 @@ public class BlinkLoadCache {
 		}
 
 		isUpToDate = true;
-		LOGGER.info(
-				"Saved atlas textures to cache ({}; took {}ms).",
-				CACHED_DATA_FILE,
-				TimeUnit.MILLISECONDS.convert(System.nanoTime() - startTime, TimeUnit.NANOSECONDS)
-		);
+		LOGGER.info("Saved atlas textures to cache ({}; took {}ms).", CACHED_DATA_FILE, TimeUnit.MILLISECONDS.convert(System.nanoTime() - startTime, TimeUnit.NANOSECONDS));
 	}
 }
