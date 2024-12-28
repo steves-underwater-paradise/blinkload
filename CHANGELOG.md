@@ -5,15 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## `v1.2.0` - 14/12/2024
+## `v1.2.0` - 28/12/2024
 
-### Changed
+### Added
 
-- The mod description supports localization
+- Localization support for the mod description (by [Wulian233](https://github.com/Wulian233) in [#15](https://github.com/steves-underwater-paradise/blinkload/pull/15))
+  - `zh_cn` mod description translation
 
 ### Fixed
 
-- Occasionally causes a NullPointerException that causes the game to crash
+- Various crashes that could occur due to an invalid cache file or `IOException`s when reading from disk (by [Wulian233](https://github.com/Wulian233) in [#15](https://github.com/steves-underwater-paradise/blinkload/pull/15))
 
 ## `v1.1.0` - 08/09/2024
 
