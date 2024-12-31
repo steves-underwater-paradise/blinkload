@@ -94,15 +94,15 @@ public class BlinkLoadCache {
 		}
 
 		var startTime = System.nanoTime();
+		@NotNull Map<AtlasTextureIdentifier, StitchResult> cachedData = new ConcurrentHashMap<>();
 		// Read JSON from the cached data file
 		try (@NotNull Reader reader = new FileReader(CACHED_DATA_FILE)) {
 			// Convert the JSON data to a Java object
 			@Nullable var stitchResults = JsonUtil.getGson().fromJson(reader, StitchResult[].class);
 			if (stitchResults == null) {
-				return new ConcurrentHashMap<>();
+				return cachedData;
 			}
 
-			@NotNull Map<AtlasTextureIdentifier, StitchResult> cachedData = new ConcurrentHashMap<>();
 			for (int stitchResultIndex = 0; stitchResultIndex < stitchResults.length; stitchResultIndex++) {
 				@NotNull var stitchResult = stitchResults[stitchResultIndex];
 				cachedData.put(new AtlasTextureIdentifier(stitchResult.getAtlasTextureId(), stitchResult.getMipLevel()), stitchResult);
