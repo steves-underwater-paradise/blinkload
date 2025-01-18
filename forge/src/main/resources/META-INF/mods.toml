@@ -1,5 +1,5 @@
 modLoader = "javafml"
-loaderVersion = ">=${forge_version}"
+loaderVersion = "*"
 license = "${mod_license}"
 issueTrackerURL = "https://github.com/steves-underwater-paradise/${mod_id}/issues"
 
@@ -22,20 +22,20 @@ modrinth = "${modrinth_project_id}"
 [[dependencies.${mod_id}]]
 modId = "minecraft"
 mandatory = true
-versionRange = "${supported_minecraft_version}"
+versionRange = "[1.20,1.20.1]"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.${mod_id}]]
 modId = "forge"
 mandatory = true
-versionRange = ">=${forge_version}"
+versionRange = "*"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.${mod_id}]]
 modId = "architectury"
 mandatory = true
-versionRange = ">=${architectury_api_version}"
+versionRange = "*"
 ordering = "NONE"
 side = "BOTH"
