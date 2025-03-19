@@ -18,7 +18,7 @@ import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 
 @Environment(EnvType.CLIENT)
-@Mixin(GLX.class)
+@Mixin(value = GLX.class, remap = false)
 public class GLXMixin {
 	@Shadow
 	private static String cpuInfo;

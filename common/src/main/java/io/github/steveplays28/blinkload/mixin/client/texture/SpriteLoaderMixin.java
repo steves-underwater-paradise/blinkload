@@ -6,9 +6,9 @@ import io.github.steveplays28.blinkload.util.resource.json.AtlasTextureIdentifie
 import io.github.steveplays28.blinkload.util.resource.json.StitchResult;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.resource.metadata.AnimationResourceMetadata;
 import net.minecraft.client.texture.*;
 import net.minecraft.resource.ResourceManager;
+import net.minecraft.resource.metadata.ResourceMetadata;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -66,7 +66,7 @@ public class SpriteLoaderMixin {
 
 				@NotNull var spriteContents = new SpriteContents(spriteId,
 						new SpriteDimensions(atlasTextureRegion.getWidth(), atlasTextureRegion.getHeight()), spriteMipmapLevel0Image,
-						AnimationResourceMetadata.EMPTY
+						ResourceMetadata.NONE
 				);
 				((SpriteContentsAccessor) spriteContents).setMipmapLevelsImages(spriteMipmapLevelsImages);
 				atlasTextureRegions.put(spriteId, new Sprite(
