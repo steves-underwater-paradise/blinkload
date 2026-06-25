@@ -83,3 +83,5 @@ features, [create an issue](https://github.com/steves-underwater-paradise/blinkl
 ## License
 
 This project is licensed under LGPLv3, see [LICENSE](https://github.com/steves-underwater-paradise/blinkload/blob/1.20.1/LICENSE).
+
+Copyright (c) 2024-2026 Bartol Jukica, Steveplays
