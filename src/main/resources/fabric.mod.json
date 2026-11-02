@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "id": "blinkload",
+  "version": "${version}",
+  "name": "BlinkLoad",
+  "description": "Caches assets to reduce game loading times.",
+  "authors": [
+    "BartolJukica",
+    "Steveplays28",
+    "Wulian233"
+  ],
+  "contact": {
+    "homepage": "https://modrinth.com/mod/blinkload",
+    "sources": "https://github.com/steves-underwater-paradise/blinkload",
+    "issues": "https://github.com/steves-underwater-paradise/blinkload/issues"
+  },
+  "license": "LGPL-3.0",
+  "icon": "assets/blinkload/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "io.github.steveplays28.blinkload.fabric.BlinkLoadFabric"
+    ]
+  },
+  "mixins": [
+    "blinkload.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "minecraft": "~1.21.11",
+    "fabric-api": "*"
+  }
+}

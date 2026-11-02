@@ -1,0 +1,21 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "io.github.steveplays28.blinkload.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "server.ServerMainMixin"
+  ],
+  "client": [
+    "client.resource.ReloadableResourceManagerImplMixin",
+    "client.texture.SpriteLoaderMixin",
+    "client.accessor.SpriteContentsAccessor",
+    "client.accessor.SpriteInvoker",
+    "client.accessor.NativeImageInvoker",
+    "client.main.ClientMainMixin",
+    "client.texture.NativeImageMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
